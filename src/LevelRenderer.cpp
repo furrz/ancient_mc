@@ -227,23 +227,14 @@ void LevelRenderer::render(const Player *player) {
         }
     }
 
-    // Rebuild exactly one visible chunk
+    // Rebuild some visible chunks
     int updatedCount = 0;
     for (const auto pos: visibleChunks) {
         if (chunksDirty_[chunkIndex(pos)]) {
             rebuildChunk(pos);
-            updatedCount++;
-            break;
+            if (++updatedCount >= 4) break;
         }
     }
-
-    if (updatedCount == 0 && prevUpdated_ != 0) {
-        std::cout << "Done chunk updates!" << std::endl;
-    } else if (updatedCount != 0 && prevUpdated_ == 0) {
-        std::cout << "Starting chunk updates..." << std::endl;
-    }
-
-    prevUpdated_ = updatedCount;
 
     // Pass 1: Brightly Lit Opaque
     glDisable(GL_FOG);
@@ -272,13 +263,14 @@ void LevelRenderer::render(const Player *player) {
 }
 
 
-void renderFace(int x, int y, int z, int face) {
-    float x0 = (float) x + 0.0F;
-    float x1 = (float) x + 1.0F;
-    float y0 = (float) y + 0.0F;
-    float y1 = (float) y + 1.0F;
-    float z0 = (float) z + 0.0F;
-    float z1 = (float) z + 1.0F;
+void renderFace(const int x, const int y, const int z, const int face) {
+    const float x0 = static_cast<float>(x) + 0.0f;
+    const float x1 = static_cast<float>(x) + 1.0f;
+    const float y0 = static_cast<float>(y) + 0.0f;
+    const float y1 = static_cast<float>(y) + 1.0f;
+    const float z0 = static_cast<float>(z) + 0.0f;
+    const float z1 = static_cast<float>(z) + 1.0f;
+
     if (face == 0) {
         glVertex3f(x0, y0, z1);
         glVertex3f(x0, y0, z0);
@@ -333,7 +325,8 @@ void LevelRenderer::renderHit(const HitResult &value) {
     glDisable(GL_BLEND);
 }
 
-void LevelRenderer::pick(const Player *player) {
+void LevelRenderer::pick(const Player *player) const
+{
     float r = 3.0F;
     const auto [a, b] = player->box().grown({r, r, r});
 
