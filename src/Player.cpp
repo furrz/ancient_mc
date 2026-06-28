@@ -13,7 +13,7 @@ constexpr float SPEED_IN_AIR = 0.005F;
 constexpr float DRAG_HORIZONTAL = 0.91F;
 constexpr float DRAG_VERTICAL = 0.98F;
 constexpr float DRAG_GROUNDED_HORIZONTAL = 0.8F;
-constexpr double GRAVITY = 0.005;
+constexpr float GRAVITY = 0.005;
 constexpr float JUMP_VELOCITY = 0.12F;
 
 float randomF()
