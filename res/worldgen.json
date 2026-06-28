@@ -2,7 +2,7 @@
   "layers": [
     { "block": "bedrock", "y": 0, "noise": 2, "noiseScale": 0.2 },
     { "block": "stone", "y": 34, "noise": 8, "noiseScale": 0.07 },
-    { "block": "dirt", "y": 40, "noise": 12, "noiseScale": 0.04 },
+    { "block": "dirt", "y": 40, "noise": 12, "noiseScale": 0.06 },
     { "block": "grass", "y": 41 },
     { "block": "water", "y": 43, "skippable": true },
     { "block": "air" }

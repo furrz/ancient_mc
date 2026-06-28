@@ -54,7 +54,16 @@ void Level::generate()
             layer.value<bool>("skippable", false));
     }
 
-    const noise::module::Perlin perlin;
+    // shaping: stone or air?
+    // water fill
+    // surface layer - grass, sand, dirt
+    // features
+
+
+    noise::module::Perlin perlin;
+    perlin.SetOctaveCount(5);
+    perlin.SetLacunarity(0.2f);
+
 
     for (int x = 0; x < size_.x; ++x) {
         for (int z = 0; z < size_.z; ++z) {
