@@ -51,7 +51,5 @@ else()
     target_link_libraries(ancient_mc PRIVATE unofficial::noise::noise)
 endif()
 
-
-
 find_package(leveldb CONFIG REQUIRED)
 target_link_libraries(ancient_mc PRIVATE leveldb::leveldb)

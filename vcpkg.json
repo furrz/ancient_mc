@@ -1,0 +1,27 @@
+{
+  "name" : "ancient-mc",
+  "version-string" : "1.0.0",
+  "builtin-baseline" : "8cdd1410ea4e2b65c7e5176e63237240460886a6",
+  "dependencies" : [ {
+    "name" : "glad",
+    "version>=" : "0.1.36"
+  }, {
+    "name" : "glm",
+    "version>=" : "1.0.3"
+  }, {
+    "name" : "glfw3",
+    "version>=" : "3.4#1"
+  }, {
+    "name" : "stb",
+    "version>=" : "2024-07-29#1"
+  }, {
+    "name" : "nlohmann-json",
+    "version>=" : "3.12.0#2"
+  }, {
+    "name" : "libnoise",
+    "version>=" : "1.0.0#3"
+  }, {
+    "name" : "leveldb",
+    "version>=" : "1.23#1"
+  } ]
+}
