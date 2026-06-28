@@ -64,7 +64,7 @@ struct AABB
     }
 
     template<int axis>
-    inline bool overlapsAxis(const AABB& other) const
+    [[nodiscard]] bool overlapsAxis(const AABB& other) const
     {
         return other.b[axis] > a[axis] && other.a[axis] < b[axis];
     }
