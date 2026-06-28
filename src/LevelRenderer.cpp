@@ -315,12 +315,16 @@ void LevelRenderer::pick(const Player *player)
     glInitNames();
 
     for(int x = (int)a.x; x < (int)b.x + 1; ++x) {
+        if (x < 0 || x >= level_->size().x) continue;
         glPushName(x);
 
         for(int y = (int)a.y; y < (int)b.y + 1; ++y) {
+            if (y < 0 || y >= level_->size().y) continue;
             glPushName(y);
 
             for(int z = (int)a.z; z < (int)b.z + 1; ++z) {
+                if (z < 0 || z >= level_->size().z) continue;
+
                 glPushName(z);
                 if (level_->blockAttribs({ x, y, z }) & PICKABLE) {
                     glPushName(0);
