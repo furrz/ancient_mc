@@ -57,12 +57,15 @@ inline bool checkFace(Level *level, const glm::ivec3 pos, const glm::ivec3 offse
 {
     const auto check = pos + offset;
 
-    if (check.x < 0 || check.y < 0 || check.z < 0 || check.x > level->size().x || check.y > level->size().y || check.z > level->size().z)
+    if (check.x < 0 || check.y < 0 || check.z < 0 || check.x > level->size().x || check.y > level->size().y || check.z > level->size().z) {
+        br = c;
         return true;
+    }
 
     if (!(level->blockAttribs(check) & attribMask)) {
-        br = level->getBrightness(check) * c;
-        return (br == c) != (layer == 0);
+        const float brightness = level->getBrightness(check);
+        br = brightness * c;
+        return (brightness == 1) == (layer == 0);
     }
 
     return false;
