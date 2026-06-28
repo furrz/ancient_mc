@@ -78,9 +78,7 @@ void Player::move()
 
     // Handle collision with blocks
     for(const auto& bb : cubes) {
-        const auto prev = vel.y;
         vel.y = bb.clipAxisCollide<1, 0, 2>(box_, vel.y);
-        if (vel.y > prev) std::cout << "Clipped going down!" << std::endl;
     }
 
     box_ = box_.moved({ 0, vel.y, 0 });

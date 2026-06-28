@@ -102,9 +102,9 @@ void Level::dirty(glm::ivec3 min, glm::ivec3 max)
 
 void Level::getCubes(AABB aabb, std::vector<AABB>& cubes, int attribs)
 {
-    for(int x = std::max(0, (int) aabb.a.x); x <= std::min(static_cast<int>(aabb.b.x + 1), size_.x - 1); ++x) {
-        for (int y = std::max(0, (int)aabb.a.y); y <= std::min(static_cast<int>(aabb.b.y + 1), size_.y - 1); ++y) {
-            for (int z = std::max(0, (int)aabb.a.z); z <= std::min((int)aabb.b.z + 1, size_.z - 1); ++z) {
+    for(int x = std::max(0, (int) aabb.a.x - 1); x <= std::min(static_cast<int>(aabb.b.x + 1), size_.x - 1); ++x) {
+        for (int y = std::max(0, (int)aabb.a.y - 1); y <= std::min(static_cast<int>(aabb.b.y + 1), size_.y - 1); ++y) {
+            for (int z = std::max(0, (int)aabb.a.z - 1); z <= std::min((int)aabb.b.z + 1, size_.z - 1); ++z) {
                 if (blockAttribs({ x, y, z }) & attribs)
                     cubes.emplace_back(
                         glm::vec3 { (float)x, (float) y, (float) z },
