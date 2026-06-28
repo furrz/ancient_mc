@@ -30,4 +30,5 @@ public:
     [[nodiscard]] glm::vec2 rot() const { return rot_; }
     [[nodiscard]] glm::vec3 pos() const { return pos_; }
     [[nodiscard]] glm::vec3 posOld() const { return posOld_; }
+    [[nodiscard]] AABB box() const { return box_; }
 };

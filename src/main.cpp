@@ -192,6 +192,31 @@ public:
         moveCameraToPlayer(delta);
     }
 
+
+    // set up the projection matrices for picking
+    void setupPickCamera(const float delta)
+    {
+        glm::ivec4 viewportBuffer;
+        glGetIntegerv(GL_VIEWPORT, glm::value_ptr(viewportBuffer));
+
+        glMatrixMode(GL_PROJECTION);
+
+        float x_scale, y_scale;
+        glfwGetWindowContentScale(window, &x_scale, &y_scale);
+
+        const auto pick = glm::pickMatrix(glm::vec2{ WIDTH * x_scale / 2.0f, HEIGHT * y_scale / 2.0f }, glm::vec2{ 5.0f, 5.0f }, viewportBuffer);
+        const auto persp = glm::perspective(
+            glm::radians(70.0f),
+            static_cast<float>(WIDTH) / static_cast<float>(HEIGHT),
+            0.05f,
+            1000.0f);
+        glLoadMatrixf(glm::value_ptr(pick * persp));
+
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        moveCameraToPlayer(delta);
+    }
+
     // pick a block
     std::optional<HitResult> pick(const float delta)
     {
@@ -232,22 +257,6 @@ public:
             return HitResult({ names[0], names[1], names[2] }, names[3], names[4]);
 
         return std::nullopt;
-    }
-
-    // set up the projection matrices for picking
-    void setupPickCamera(const float delta)
-    {
-        glm::ivec4 viewportBuffer;
-        glGetIntegerv(GL_VIEWPORT, glm::value_ptr(viewportBuffer));
-
-        glMatrixMode(GL_PROJECTION);
-
-        const auto pick = glm::pickMatrix(glm::vec2{ WIDTH / 2.0f, HEIGHT / 2.0f }, glm::vec2{ 5.0f, 5.0f }, viewportBuffer);
-        const auto persp = glm::perspective(glm::radians(70.0f), static_cast<float>(WIDTH) / static_cast<float>(HEIGHT), 0.05f, 1000.0f);
-        glLoadMatrixf(glm::value_ptr(pick * persp));
-
-        glMatrixMode(GL_MODELVIEW);
-        moveCameraToPlayer(delta);
     }
 
     void moveCameraToPlayer(const float delta)

@@ -246,8 +246,94 @@ void LevelRenderer::renderHit(const HitResult& value)
 {
 }
 
+void renderFace(int x, int y, int z, int face)
+{
+    float x0 = (float)x + 0.0F;
+    float x1 = (float)x + 1.0F;
+    float y0 = (float)y + 0.0F;
+    float y1 = (float)y + 1.0F;
+    float z0 = (float)z + 0.0F;
+    float z1 = (float)z + 1.0F;
+    if (face == 0) {
+        glVertex3f(x0, y0, z1);
+        glVertex3f(x0, y0, z0);
+        glVertex3f(x1, y0, z0);
+        glVertex3f(x1, y0, z1);
+    }
+
+    if (face == 1) {
+        glVertex3f(x1, y1, z1);
+        glVertex3f(x1, y1, z0);
+        glVertex3f(x0, y1, z0);
+        glVertex3f(x0, y1, z1);
+    }
+
+    if (face == 2) {
+        glVertex3f(x0, y1, z0);
+        glVertex3f(x1, y1, z0);
+        glVertex3f(x1, y0, z0);
+        glVertex3f(x0, y0, z0);
+    }
+
+    if (face == 3) {
+        glVertex3f(x0, y1, z1);
+        glVertex3f(x0, y0, z1);
+        glVertex3f(x1, y0, z1);
+        glVertex3f(x1, y1, z1);
+    }
+
+    if (face == 4) {
+        glVertex3f(x0, y1, z1);
+        glVertex3f(x0, y1, z0);
+        glVertex3f(x0, y0, z0);
+        glVertex3f(x0, y0, z1);
+    }
+
+    if (face == 5) {
+        glVertex3f(x1, y0, z1);
+        glVertex3f(x1, y0, z0);
+        glVertex3f(x1, y1, z0);
+        glVertex3f(x1, y1, z1);
+    }
+}
+
 void LevelRenderer::pick(const Player *player)
 {
+    float r = 3.0F;
+    const auto [a, b] = player->box().grown({ r, r, r });
+
+    glInitNames();
+
+    for(int x = (int)a.x; x < (int)b.x + 1; ++x) {
+        glPushName(x);
+
+        for(int y = (int)a.y; y < (int)b.y + 1; ++y) {
+            glPushName(y);
+
+            for(int z = (int)a.z; z < (int)b.z + 1; ++z) {
+                glPushName(z);
+                if (level_->blockAttribs({ x, y, z }) & PICKABLE) {
+                    glPushName(0);
+
+                    for(int i = 0; i < 6; ++i) {
+                        glPushName(i);
+                        glBegin(GL_QUADS);
+                        renderFace(x, y, z, i);
+                        glEnd();
+                        glPopName();
+                    }
+
+                    glPopName();
+                }
+
+                glPopName();
+            }
+
+            glPopName();
+        }
+
+        glPopName();
+    }
 }
 
 void LevelRenderer::handleDirtyRegions()

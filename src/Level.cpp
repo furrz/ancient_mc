@@ -79,6 +79,7 @@ void Level::save() const
 void Level::setTile(glm::ivec3 pos, uint8_t blockId)
 {
     block(pos) = blockId;
+    dirty(pos - 1, pos + 1);
 }
 
 void Level::calcLightDepths(int xA, int zA, int xB, int zB)
