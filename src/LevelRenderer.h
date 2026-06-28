@@ -29,7 +29,7 @@ public:
     void rebuildChunk(glm::ivec3 pos);
     void render(const Player *player);
     void renderHit(const HitResult& value);
-    void pick(const Player *player);
+    void pick(const Player *player) const;
     void handleDirtyRegions();
 
     [[nodiscard]] int chunkIndex(const glm::ivec3 pos) const

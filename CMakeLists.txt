@@ -13,13 +13,13 @@ add_executable(ancient_mc src/main.cpp
         src/Input.cpp
         src/Input.h
         src/AABB.h
-        src/BlockAttribs.h
         src/LevelRenderer.cpp
         src/LevelRenderer.h
         src/HitResult.h
         src/BlockInfo.cpp
         src/BlockInfo.h
         src/read_json.h
+        src/rng.h
 )
 
 find_package(glm CONFIG REQUIRED)

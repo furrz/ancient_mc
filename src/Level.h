@@ -3,7 +3,6 @@
 #include <glm/vec3.hpp>
 
 #include "AABB.h"
-#include "BlockAttribs.h"
 #include "BlockInfo.h"
 
 using iv3range = std::pair<glm::ivec3, glm::ivec3>;

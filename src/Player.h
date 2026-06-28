@@ -29,6 +29,10 @@ public:
 
     [[nodiscard]] glm::vec2 rot() const { return rot_; }
     [[nodiscard]] glm::vec3 pos() const { return pos_; }
-    [[nodiscard]] glm::vec3 posOld() const { return posOld_; }
     [[nodiscard]] AABB box() const { return box_; }
+
+    [[nodiscard]] glm::vec3 posInterpolated(const float dt) const
+    {
+        return posOld_ + (pos_ - posOld_) * dt;
+    }
 };

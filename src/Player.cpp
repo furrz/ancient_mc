@@ -1,5 +1,7 @@
 #include "Player.h"
 
+#include "rng.h"
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -21,11 +23,6 @@ constexpr float DRAG_GROUNDED_HORIZONTAL = 0.8F;
 constexpr float GRAVITY = 0.005;
 constexpr float JUMP_VELOCITY = 0.12F;
 
-float randomF()
-{
-    return static_cast<float>(static_cast<double>(rand()) / RAND_MAX); // NOLINT(*-msc50-cpp)
-}
-
 Player::Player(Level *level)
 {
     level_ = level;
@@ -34,9 +31,9 @@ Player::Player(Level *level)
 
 void Player::resetPos()
 {
-    float x = randomF() * static_cast<float>(level_->size().x);
+    float x = RNG::randomFloat() * static_cast<float>(level_->size().x);
     float y = static_cast<float>(level_->size().y);
-    float z = randomF() * static_cast<float>(level_->size().z);
+    float z = RNG::randomFloat() * static_cast<float>(level_->size().z);
     setPos({ x, y, z });
 }
 
@@ -51,7 +48,7 @@ void Player::setPos(const glm::vec3 pos)
     box_ = AABB { pos - SIZE, pos + SIZE };
 }
 
-void Player::moveRelative(glm::vec2 movement, float speed)
+void Player::moveRelative(glm::vec2 movement, const float speed)
 {
     if (movement == glm::vec2 {0, 0}) return;
 

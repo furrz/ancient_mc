@@ -3,8 +3,6 @@
 #include <fstream>
 #include <iostream>
 
-#include "BlockAttribs.h"
-
 Level::Level(const int w, const int h, const int d, BlockInfo *blockInfo) : size_(w, d, h), blockInfo_(blockInfo)
 {
     blocks_.resize(w * h * d);
@@ -59,7 +57,7 @@ void Level::save() const
     out.close();
 }
 
-void Level::setTile(glm::ivec3 pos, uint8_t blockId)
+void Level::setTile(const glm::ivec3 pos, const uint8_t blockId)
 {
     block(pos) = blockId;
     dirty(pos - 1, pos + 1);

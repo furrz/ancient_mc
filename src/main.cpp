@@ -1,8 +1,6 @@
 #include <array>
-#include <iostream>
 #include <memory>
 #include <optional>
-#include <ostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -13,11 +11,13 @@
 #include "Level.h"
 #include "LevelRenderer.h"
 #include "Player.h"
+#include "rng.h"
 
 constexpr int WIDTH = 1024;
 constexpr int HEIGHT = 768;
-constexpr glm::vec3 clearColor { 0.5, 0.8, 1.0 };
-constexpr glm::vec3 fogColor { 14 / 255.0f, 11 / 255.0f, 10 / 255.0f };
+constexpr float ASPECT = WIDTH / static_cast<float>(HEIGHT);
+constexpr glm::vec3 clearColor{ 0.5, 0.8, 1.0 };
+constexpr glm::vec3 fogColor{ 14 / 255.0f, 11 / 255.0f, 10 / 255.0f };
 
 class App
 {
@@ -30,9 +30,9 @@ class App
     glm::dvec2 prevCursorPos{};
     bool breakBlock{}, placeBlock{};
 
-    static void mouseButtonCallback(GLFWwindow* window, const int button, const int action, const int)
+    static void mouseButtonCallback(GLFWwindow *window, const int button, const int action, const int)
     {
-        const auto app = static_cast<App*>(glfwGetWindowUserPointer(window));
+        const auto app = static_cast<App *>(glfwGetWindowUserPointer(window));
         if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
             app->breakBlock = true;
         else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
@@ -106,7 +106,8 @@ public:
         }
     }
 
-    void tick() const {
+    void tick() const
+    {
         inventory->tick();
         player->tick();
     }
@@ -133,21 +134,25 @@ public:
             placeBlock = false;
 
             if (hitResult) {
-
                 // determine where we actually hit
                 glm::ivec3 pos = hitResult->pos;
                 switch (hitResult->f) {
-                case 0: pos.y--; break;
-                case 1: pos.y++; break;
-                case 2: pos.z--; break;
-                case 3: pos.z++; break;
-                case 4: pos.x--; break;
-                case 5: pos.x++; break;
+                case 0: pos.y--;
+                    break;
+                case 1: pos.y++;
+                    break;
+                case 2: pos.z--;
+                    break;
+                case 3: pos.z++;
+                    break;
+                case 4: pos.x--;
+                    break;
+                case 5: pos.x++;
+                    break;
                 default: break;
                 }
 
                 level->setTile(pos, inventory->getBlockId());
-
             }
         }
 
@@ -178,13 +183,12 @@ public:
         glfwSwapBuffers(window);
     }
 
-    void setupCamera(const float delta) const {
+    void setupCamera(const float delta) const
+    {
         glMatrixMode(GL_PROJECTION);
-        const auto aspect = WIDTH / static_cast<float>(HEIGHT);
         const glm::mat4 perspective = glm::perspective(
             glm::radians(70.0f),
-            aspect,
-            0.05f, 1000.0f);
+            ASPECT, 0.05f, 1000.0f);
         glLoadMatrixf(glm::value_ptr(perspective));
 
         glMatrixMode(GL_MODELVIEW);
@@ -192,9 +196,9 @@ public:
         moveCameraToPlayer(delta);
     }
 
-
     // set up the projection matrices for picking
-    void setupPickCamera(const float delta) const {
+    void setupPickCamera(const float delta) const
+    {
         glm::ivec4 viewportBuffer;
         glGetIntegerv(GL_VIEWPORT, glm::value_ptr(viewportBuffer));
 
@@ -203,13 +207,16 @@ public:
         float x_scale, y_scale;
         glfwGetWindowContentScale(window, &x_scale, &y_scale);
 
-        const auto pick = glm::pickMatrix(glm::vec2{ WIDTH * x_scale / 2.0f, HEIGHT * y_scale / 2.0f }, glm::vec2{ 5.0f, 5.0f }, viewportBuffer);
-        const auto persp = glm::perspective(
+        const auto pick = glm::pickMatrix(glm::vec2{
+                                              WIDTH * x_scale / 2.0f,
+                                              HEIGHT * y_scale / 2.0f
+                                          }, glm::vec2{ 5.0f, 5.0f }, viewportBuffer);
+
+        const auto perspective = glm::perspective(
             glm::radians(70.0f),
-            static_cast<float>(WIDTH) / static_cast<float>(HEIGHT),
-            0.05f,
-            1000.0f);
-        glLoadMatrixf(glm::value_ptr(pick * persp));
+            ASPECT, 0.05f, 1000.0f);
+
+        glLoadMatrixf(glm::value_ptr(pick * perspective));
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
@@ -217,7 +224,7 @@ public:
     }
 
     // pick a block
-    std::optional<HitResult> pick(const float delta)
+    std::optional<HitResult> pick(const float delta) const
     {
         std::array<unsigned, 2000> selectBuffer{};
         glSelectBuffer(selectBuffer.size(), selectBuffer.data());
@@ -229,7 +236,7 @@ public:
         const int hits = glRenderMode(GL_RENDER);
 
         long closest{};
-        std::array<int, 10> names {};
+        std::array<int, 10> names{};
         int hitNameCount = 0;
 
         int cursor = 0;
@@ -253,16 +260,20 @@ public:
         }
 
         if (hitNameCount > 0)
-            return HitResult({ names[0], names[1], names[2] }, names[3], names[4]);
+            return HitResult(
+                { names[0], names[1], names[2] },
+                names[3], names[4]
+            );
 
         return std::nullopt;
     }
 
-    void moveCameraToPlayer(const float delta) const {
+    void moveCameraToPlayer(const float delta) const
+    {
         glTranslatef(0.0F, 0.0F, -0.3F);
         glRotatef(player->rot().x, 1.0F, 0.0F, 0.0F);
         glRotatef(player->rot().y, 0.0F, 1.0F, 0.0F);
-        const auto pos = player->posOld() + (player->pos() - player->posOld()) * delta;
+        const auto pos = player->posInterpolated(delta);
         glTranslatef(-pos.x, -pos.y, -pos.z);
     }
 
@@ -275,7 +286,7 @@ public:
 
 int main()
 {
-    srand(time(nullptr)); // NOLINT(*-msc51-cpp)
+    RNG::seed();
 
     App app;
     app.run();
