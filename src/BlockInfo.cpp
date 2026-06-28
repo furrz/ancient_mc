@@ -1,11 +1,6 @@
 #include "BlockInfo.h"
 
-#include <fstream>
-#include <iostream>
-#include <nlohmann/json.hpp>
-
-
-using json = nlohmann::json;
+#include "read_json.h"
 
 std::unordered_map<std::string, int> namedAttribs {
     { "LIGHT_BLOCKER", LIGHT_BLOCKER },
@@ -22,17 +17,15 @@ std::unordered_map<std::string, int> namedAttribs {
 };
 
 BlockInfo::BlockInfo() {
-    std::ifstream in("res/block_info.json");
-    if (!in.is_open()) {
-        std::cerr << "Could not open res/block_info.json!" << std::endl;
-        return;
-    }
+    const auto data = read_json("res/block_info.json");
 
-    const auto data = json::parse(in);
-    in.close();
+    for (const auto& block : data) {
+        const std::string id = block["id"];
+        byID_[id] = id_.size();
+        id_.emplace_back(id);
 
-    for (const json& block : data) {
         name_.emplace_back(block["name"]);
+
 
         int attribs{};
         for (const std::string attribName : block["attribs"]) {

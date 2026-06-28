@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <string>
+#include <unordered_map>
 #include <vector>
 #include "BlockAttribs.h"
 
@@ -10,6 +11,8 @@ class BlockInfo {
     std::vector<uint8_t> topIdx_;
     std::vector<uint8_t> bottomIdx_;
     std::vector<int> attribs_;
+    std::vector<std::string> id_;
+    std::unordered_map<std::string, uint8_t> byID_;
 
 public:
     BlockInfo();
@@ -20,6 +23,14 @@ public:
 
     [[nodiscard]] const std::string& name(const uint8_t block) const {
         return name_[block];
+    }
+
+    [[nodiscard]] const std::string& id(const uint8_t block) const {
+        return id_[block];
+    }
+
+    [[nodiscard]] uint8_t byID(const std::string& id) const {
+        return byID_.at(id);
     }
 
     [[nodiscard]] uint8_t textureIndex(const uint8_t block, const int face) const {

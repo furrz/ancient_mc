@@ -2,13 +2,21 @@
 #include "Inventory.h"
 
 #include "Input.h"
+#include "read_json.h"
+
+Inventory::Inventory(BlockInfo *blockInfo): blockInfo_(blockInfo) {
+    const auto inv = read_json("res/inventory.json");
+
+    for (const std::string item : inv) {
+        slots_.push_back(blockInfo_->byID(item));
+    }
+}
 
 void Inventory::tick()
 {
-    if (Input::getKey(GLFW_KEY_1)) slot_ = 0;
-    if (Input::getKey(GLFW_KEY_2)) slot_ = 1;
-    if (Input::getKey(GLFW_KEY_3)) slot_ = 2;
-    // TODO inventory tick
+    for (int i = 0; i < slots_.size(); i++) {
+        if (Input::getKey(GLFW_KEY_1 + i)) slot_ = i;
+    }
 }
 
 uint8_t Inventory::getBlockId() const
@@ -45,9 +53,9 @@ void Inventory::render()
 
         const auto tex = blockInfo_->textureIndex(slots_[i], 2);
 
-        float u0 = (float)tex / 16.0F;
+        float u0 = (float)tex / 16.0f;
         float u1 = u0 + 0.0624375F;
-        float v0 = 0.0F;
+        float v0 = (float)(tex / 16) / 16.0f;
         float v1 = v0 + 0.0624375F;
 
         glColor4f(color, color, color, color);
