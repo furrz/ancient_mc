@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 4.0)
 project(ancient_mc)
 
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 add_executable(ancient_mc src/main.cpp
         src/Level.cpp
