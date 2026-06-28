@@ -49,7 +49,7 @@ Player::Player(leveldb::DB *db, ConVars *conVars, Level *level) : db_(db)
 
 void Player::save() const
 {
-    SavedState state {
+    const SavedState state {
         pos_, vel_, rot_
     };
     db_->Put({}, "playerState", { reinterpret_cast<const char *>(&state), sizeof(state) });
