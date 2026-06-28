@@ -254,6 +254,8 @@ void LevelRenderer::render(const glm::ivec3 center) {
         glCallList(chunkDrawLists_ + chunkIndex(pos) * NUM_CHUNK_PASSES);
     }
 
+    glEnable(GL_BLEND);
+
     // Pass 4: Transparent
     for (const auto pos: visibleChunks) {
         glCallList(chunkDrawLists_ + chunkIndex(pos) * NUM_CHUNK_PASSES + 1);
