@@ -14,23 +14,23 @@
 
 Player::Player(ConVars *conVars, Level *level)
 {
-    conVars->setupVar("speed_running", "Player Running Speed", &attrSpeedRunning_);
-    conVars->setupVar("speed_walking", "Player Walking Speed", &attrSpeedWalking_);
-    conVars->setupVar("speed_in_air", "Player Speed In Air", &attrSpeedInAir_);
-    conVars->setupVar("flying_speed", "Player Flying Speed", &attrFlyingSpeed_);
-    conVars->setupVar("drag_horizontal", "Player Horizontal Drag Coefficient", &attrDragHorizontal_);
-    conVars->setupVar("drag_vertical", "Player Vertical Drag Coefficient", &attrDragVertical_);
-    conVars->setupVar("drag_grounded_horizontal", "Player Additional Horizontal Drag while Grounded", &attrDragGroundedHorizontal_);
-    conVars->setupVar("jump_velocity", "Player Jump Velocity", &attrJumpVelocity_);
-    conVars->setupVar("gravity", "Player Gravity", &attrGravity_);
-    conVars->setupVar("gravity_in_water", "Player Gravity in Water", &attrGravityInWater_);
-    conVars->setupVar("swim_upward_max_velocity", "Player Maximum Velocity while Swimming Upward", &attrSwimUpwardMaxVelocity_);
-    conVars->setupVar("swim_upward_acceleration", "Player Acceleration while Swimming Upward", &attrSwimUpwardAcceleration_);
-    conVars->setupVar("max_pitch_angle", "Maximum Upward/Downward Look Angle", &attrMaxPitchAngle_);
-    conVars->setupVar("player_radius", "Player Hitbox Half-Width", &attrPlayerRadius_);
-    conVars->setupVar("player_half_height", "Player Hitbox Half-Height", &attrPlayerHalfHeight_);
-    conVars->setupVar("mouse_look_speed", "Mouse Look Sensitivity", &attrMouseLookSpeed_, ConVars::SaveType::UserPrefs);
-    conVars->setupVar("flying", "Player is Flying", &flying_, ConVars::SaveType::None);
+    conVars->setupVar("player_phys_speed_running", "Player Running Speed", &attrSpeedRunning_);
+    conVars->setupVar("player_phys_speed_walking", "Player Walking Speed", &attrSpeedWalking_);
+    conVars->setupVar("player_phys_speed_in_air", "Player Speed In Air", &attrSpeedInAir_);
+    conVars->setupVar("player_phys_flying_speed", "Player Flying Speed", &attrFlyingSpeed_);
+    conVars->setupVar("player_phys_drag_horizontal", "Player Horizontal Drag Coefficient", &attrDragHorizontal_);
+    conVars->setupVar("player_phys_drag_vertical", "Player Vertical Drag Coefficient", &attrDragVertical_);
+    conVars->setupVar("player_phys_drag_grounded_horizontal", "Player Additional Horizontal Drag while Grounded", &attrDragGroundedHorizontal_);
+    conVars->setupVar("player_phys_jump_velocity", "Player Jump Velocity", &attrJumpVelocity_);
+    conVars->setupVar("player_phys_gravity", "Player Gravity", &attrGravity_);
+    conVars->setupVar("player_phys_gravity_in_water", "Player Gravity in Water", &attrGravityInWater_);
+    conVars->setupVar("player_phys_swim_upward_max_velocity", "Player Maximum Velocity while Swimming Upward", &attrSwimUpwardMaxVelocity_);
+    conVars->setupVar("player_phys_swim_upward_acceleration", "Player Acceleration while Swimming Upward", &attrSwimUpwardAcceleration_);
+    conVars->setupVar("player_phys_radius", "Player Hitbox Half-Width", &attrPlayerRadius_);
+    conVars->setupVar("player_phys_half_height", "Player Hitbox Half-Height", &attrPlayerHalfHeight_);
+    conVars->setupVar("player_cam_max_pitch_angle", "Maximum Upward/Downward Look Angle", &attrMaxPitchAngle_);
+    conVars->setupVar("player_cam_mouse_look_speed", "Mouse Look Sensitivity", &attrMouseLookSpeed_, ConVars::SaveType::UserPrefs);
+    conVars->setupVar("player_state_flying", "Player is Flying", &flying_, ConVars::SaveType::None);
 
     level_ = level;
     resetPos();

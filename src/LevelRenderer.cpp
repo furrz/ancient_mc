@@ -15,7 +15,7 @@ LevelRenderer::LevelRenderer(ConVars *conVars, Level *level, BlockInfo *blockInf
       sizeInChunks_(level_->size() / CHUNK_SIZE),
       blockInfo_(blockInfo) {
 
-    conVars->setupVar("max_chunk_rebuilds_per_frame", "Maximum number of chunks that can be rebuilt (mesh generated) per render frame", &attrMaxChunkRebuildsPerFrame_);
+    conVars->setupVar("renderer_max_chunk_rebuilds_per_frame", "Maximum number of chunks that can be rebuilt (mesh generated) per render frame", &attrMaxChunkRebuildsPerFrame_);
 
     const int chunkCount = numChunks();
     chunksDirty_.resize(chunkCount);
