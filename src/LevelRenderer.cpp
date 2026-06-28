@@ -299,14 +299,12 @@ void renderFace(int x, int y, int z, int face)
 void LevelRenderer::renderHit(const HitResult& value)
 {
     glEnable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glColor4f(1.0f, 1.0f, 1.0f, sinf(glfwGetTime()) * 0.2f + 0.4f);
     glBegin(GL_QUADS);
     renderFace(value.pos.x, value.pos.y, value.pos.z, value.f);
     glEnd();
     glDisable(GL_BLEND);
-    glEnable(GL_DEPTH_TEST);
 }
 
 void LevelRenderer::pick(const Player *player)
