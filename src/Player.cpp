@@ -152,7 +152,7 @@ void Player::tick()
     move();
     vel_.x *= DRAG_HORIZONTAL;
     vel_.y *= DRAG_VERTICAL;
-    vel_.x *= DRAG_HORIZONTAL;
+    vel_.z *= DRAG_HORIZONTAL;
 
     if (onGround_ || flying_) {
         vel_.x *= DRAG_GROUNDED_HORIZONTAL;
