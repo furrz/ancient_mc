@@ -47,17 +47,11 @@ struct AABB
             !overlapsAxis<secondaryAxisB>(box)) return change;
 
         if (change > 0.0f && box.b[primaryAxis] <= a[primaryAxis]) {
-            float max = a[primaryAxis] - box.b[primaryAxis];
-            if (max < change) {
-                change = max;
-            }
+            change = std::min(change, a[primaryAxis] - box.b[primaryAxis]);
         }
 
         if (change < 0.0F && box.a[primaryAxis] >= b[primaryAxis]) {
-            float max = b[primaryAxis] - box.a[primaryAxis];
-            if (max > change) {
-                change = max;
-            }
+            change = std::max(change, b[primaryAxis] - box.a[primaryAxis]);
         }
 
         return change;
