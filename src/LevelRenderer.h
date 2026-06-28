@@ -23,7 +23,7 @@ class LevelRenderer
     int attrMaxChunkRebuildsPerFrame_ = 4;
     int attrRenderDistance_ = 8;
 
-    void drawTile(glm::ivec3 pos, int layer, int attribMask) const;
+    void drawTile(glm::ivec3 pos, int attribMask) const;
 
 public:
     explicit LevelRenderer(ConVars *conVars, Level *level, BlockInfo *blockInfo);

@@ -8,6 +8,7 @@
 #include "ConVars.h"
 #include "Level.h"
 
+constexpr auto NUM_CHUNK_PASSES = 2;
 
 LevelRenderer::LevelRenderer(ConVars *conVars, Level *level, BlockInfo *blockInfo)
     : level_(level),
@@ -19,7 +20,7 @@ LevelRenderer::LevelRenderer(ConVars *conVars, Level *level, BlockInfo *blockInf
 
     const int chunkCount = numChunks();
     chunksDirty_.resize(chunkCount);
-    chunkDrawLists_ = glGenLists(4 * chunkCount);
+    chunkDrawLists_ = glGenLists(NUM_CHUNK_PASSES * chunkCount);
     chunksDirty_.assign(chunkCount, true);
 
     // Load terrain image
@@ -40,7 +41,7 @@ LevelRenderer::LevelRenderer(ConVars *conVars, Level *level, BlockInfo *blockInf
 }
 
 LevelRenderer::~LevelRenderer() {
-    glDeleteLists(chunkDrawLists_, numChunks() * 4);
+    glDeleteLists(chunkDrawLists_, numChunks() * NUM_CHUNK_PASSES);
 }
 
 void LevelRenderer::rebuildChunk(const glm::ivec3 pos) {
@@ -50,48 +51,46 @@ void LevelRenderer::rebuildChunk(const glm::ivec3 pos) {
     const auto start = pos * 16;
     const auto end = start + 16;
 
-    for (const auto layer: {0, 1}) {
-        for (const auto transparent: {false, true}) {
-            const auto attribMask = transparent ? DRAW_TRANSPARENT : DRAW_OPAQUE;
+    for (const auto transparent: {false, true}) {
+        const auto attribMask = transparent ? DRAW_TRANSPARENT : DRAW_OPAQUE;
 
-            const int offset = layer + (transparent ? 2 : 0);
+        const int offset = transparent;
 
-            glNewList(chunkDrawLists_ + index * 4 + offset, GL_COMPILE);
-            glEnable(GL_TEXTURE_2D);
-            // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            glBindTexture(GL_TEXTURE_2D, texture_);
-            glBegin(GL_QUADS);
+        glNewList(chunkDrawLists_ + index * NUM_CHUNK_PASSES + offset, GL_COMPILE);
+        glEnable(GL_TEXTURE_2D);
+        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glBindTexture(GL_TEXTURE_2D, texture_);
+        glBegin(GL_QUADS);
 
-            for (int x = start.x; x < end.x; x++) {
-                for (int y = start.y; y < end.y; y++) {
-                    for (int z = start.z; z < end.z; z++) {
-                        if (level_->blockAttribs({x, y, z}) & attribMask) {
-                            drawTile({x, y, z}, layer, attribMask);
-                        }
+        for (int x = start.x; x < end.x; x++) {
+            for (int y = start.y; y < end.y; y++) {
+                for (int z = start.z; z < end.z; z++) {
+                    if (level_->blockAttribs({x, y, z}) & attribMask) {
+                        drawTile({x, y, z}, attribMask);
                     }
                 }
             }
-
-            glEnd();
-            glEndList();
         }
+
+        glEnd();
+        glEndList();
     }
 }
 
 inline bool checkFace(Level *level, const glm::ivec3 pos, const glm::ivec3 offset,
-    const int attribMask, const float c, const int layer,
+    const int attribMask, const float c,
                       float &br) {
     const auto check = pos + offset;
 
     if (!level->inBounds(check)) {
         br = c;
-        return layer == 0;
+        return true;
     }
 
     if (!(level->blockAttribs(check) & attribMask)) {
         const float brightness = level->getBrightness(check);
         br = brightness * c;
-        return (brightness == 1) == (layer == 0);
+        return true;
     }
 
     return false;
@@ -104,7 +103,7 @@ constexpr glm::vec2 uvMinFor(const uint8_t tex) {
     };
 }
 
-void LevelRenderer::drawTile(const glm::ivec3 pos, int layer, int attribMask) const {
+void LevelRenderer::drawTile(const glm::ivec3 pos, int attribMask) const {
     constexpr float c1 = 1.0F;
     constexpr float c2 = 0.8F;
     constexpr float c3 = 0.6F;
@@ -116,7 +115,7 @@ void LevelRenderer::drawTile(const glm::ivec3 pos, int layer, int attribMask) co
     const float z1 = static_cast<float>(pos.z) + 1.0F;
     float br;
 
-    if (checkFace(level_, pos, {0, -1, 0}, attribMask, c1, layer, br)) {
+    if (checkFace(level_, pos, {0, -1, 0}, attribMask, c1, br)) {
         const auto tex = blockInfo_->textureIndex(level_->block(pos), 0);
         const auto uvMin = uvMinFor(tex);
         const auto uvMax = uvMin + 0.0624375f;
@@ -132,7 +131,7 @@ void LevelRenderer::drawTile(const glm::ivec3 pos, int layer, int attribMask) co
         glVertex3f(x1, y0, z1);
     }
 
-    if (checkFace(level_, pos, {0, 1, 0}, attribMask, c1, layer, br)) {
+    if (checkFace(level_, pos, {0, 1, 0}, attribMask, c1, br)) {
         const auto tex = blockInfo_->textureIndex(level_->block(pos), 1);
         const auto uvMin = uvMinFor(tex);
         const auto uvMax = uvMin + 0.0624375f;
@@ -153,7 +152,7 @@ void LevelRenderer::drawTile(const glm::ivec3 pos, int layer, int attribMask) co
         glVertex3f(x0, y1, z1);
     }
 
-    if (checkFace(level_, pos, {0, 0, -1}, attribMask, c2, layer, br)) {
+    if (checkFace(level_, pos, {0, 0, -1}, attribMask, c2, br)) {
         const auto tex = blockInfo_->textureIndex(level_->block(pos), 2);
         const auto uvMin = uvMinFor(tex);
         const auto uvMax = uvMin + 0.0624375f;
@@ -169,7 +168,7 @@ void LevelRenderer::drawTile(const glm::ivec3 pos, int layer, int attribMask) co
         glVertex3f(x0, y0, z0);
     }
 
-    if (checkFace(level_, pos, {0, 0, 1}, attribMask, c2, layer, br)) {
+    if (checkFace(level_, pos, {0, 0, 1}, attribMask, c2, br)) {
         const auto tex = blockInfo_->textureIndex(level_->block(pos), 3);
         const auto uvMin = uvMinFor(tex);
         const auto uvMax = uvMin + 0.0624375f;
@@ -185,7 +184,7 @@ void LevelRenderer::drawTile(const glm::ivec3 pos, int layer, int attribMask) co
         glVertex3f(x1, y1, z1);
     }
 
-    if (checkFace(level_, pos, {-1, 0, 0}, attribMask, c3, layer, br)) {
+    if (checkFace(level_, pos, {-1, 0, 0}, attribMask, c3, br)) {
         const auto tex = blockInfo_->textureIndex(level_->block(pos), 4);
         const auto uvMin = uvMinFor(tex);
         const auto uvMax = uvMin + 0.0624375f;
@@ -201,7 +200,7 @@ void LevelRenderer::drawTile(const glm::ivec3 pos, int layer, int attribMask) co
         glVertex3f(x0, y0, z1);
     }
 
-    if (checkFace(level_, pos, {1, 0, 0}, attribMask, c3, layer, br)) {
+    if (checkFace(level_, pos, {1, 0, 0}, attribMask, c3, br)) {
         const auto tex = blockInfo_->textureIndex(level_->block(pos), 5);
         const auto uvMin = uvMinFor(tex);
         const auto uvMax = uvMin + 0.0624375f;
@@ -249,29 +248,15 @@ void LevelRenderer::render(const glm::ivec3 center) {
         }
     }
 
-    // Pass 1: Brightly Lit Opaque
+    // Pass 1: Opaque
     glDisable(GL_FOG);
     for (const auto pos: visibleChunks) {
-        glCallList(chunkDrawLists_ + chunkIndex(pos) * 4);
+        glCallList(chunkDrawLists_ + chunkIndex(pos) * NUM_CHUNK_PASSES);
     }
 
-    // Pass 2: Foggy Opaque
-    glEnable(GL_FOG);
+    // Pass 4: Transparent
     for (const auto pos: visibleChunks) {
-        glCallList(chunkDrawLists_ + chunkIndex(pos) * 4 + 1);
-    }
-
-    // Pass 3: Foggy Transparent
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    for (const auto pos: visibleChunks) {
-        glCallList(chunkDrawLists_ + chunkIndex(pos) * 4 + 3);
-    }
-
-    // Pass 4: Brightly Lit Transparent
-    glDisable(GL_FOG);
-    for (const auto pos: visibleChunks) {
-        glCallList(chunkDrawLists_ + chunkIndex(pos) * 4 + 2);
+        glCallList(chunkDrawLists_ + chunkIndex(pos) * NUM_CHUNK_PASSES + 1);
     }
 }
 
@@ -326,7 +311,6 @@ void renderFace(const int x, const int y, const int z, const int face) {
         glVertex3f(x1, y1, z1);
     }
 }
-
 
 void LevelRenderer::renderHit(const HitResult &value) {
     glEnable(GL_BLEND);
