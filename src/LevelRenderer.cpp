@@ -30,7 +30,9 @@ void LevelRenderer::rebuildChunk(const glm::ivec3 pos)
         for (const auto transparent: { false, true }) {
             const auto attribMask = transparent ? DRAW_TRANSPARENT : DRAW_OPAQUE;
 
-            glNewList(chunkDrawLists_ + index * 4 + layer + (transparent ? 0 : 2), GL_COMPILE);
+            const int offset = layer + (transparent ? 2 : 0);
+
+            glNewList(chunkDrawLists_ + index * 4 + offset, GL_COMPILE);
             glEnable(GL_TEXTURE_2D);
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             glBindTexture(GL_TEXTURE_2D, texture_);
@@ -57,9 +59,9 @@ inline bool checkFace(Level *level, const glm::ivec3 pos, const glm::ivec3 offse
 {
     const auto check = pos + offset;
 
-    if (check.x < 0 || check.y < 0 || check.z < 0 || check.x > level->size().x || check.y > level->size().y || check.z > level->size().z) {
+    if (check.x < 0 || check.y < 0 || check.z < 0 || check.x >= level->size().x || check.y >= level->size().y || check.z >= level->size().z) {
         br = c;
-        return true;
+        return layer == 0;
     }
 
     if (!(level->blockAttribs(check) & attribMask)) {
@@ -189,7 +191,9 @@ void LevelRenderer::render(const Player *player)
     }
 
     if (updatedCount == 0 && prevUpdated_ != 0) {
-        std::cout << "Done updating!" << std::endl;
+        std::cout << "Done chunk updates!" << std::endl;
+    } else if (updatedCount != 0 && prevUpdated_ == 0) {
+        std::cout << "Starting chunk updates..." << std::endl;
     }
 
     prevUpdated_ = updatedCount;
