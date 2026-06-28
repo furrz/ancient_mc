@@ -76,7 +76,7 @@ public:
 
         conVars_ = std::make_unique<ConVars>();
         blockInfo = std::make_unique<BlockInfo>();
-        level = std::make_unique<Level>(conVars_.get(), 256, 256, 64, blockInfo.get());
+        level = std::make_unique<Level>(conVars_.get(), 256, 256, 256, blockInfo.get());
         player = std::make_unique<Player>(conVars_.get(), level.get());
         inventory = std::make_unique<Inventory>(blockInfo.get());
         levelRenderer = std::make_unique<LevelRenderer>(conVars_.get(), level.get(), blockInfo.get());

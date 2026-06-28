@@ -61,8 +61,8 @@ void Level::generate()
 
 
     noise::module::Perlin perlin;
-    perlin.SetOctaveCount(5);
-    perlin.SetLacunarity(0.2f);
+    perlin.SetOctaveCount(8);
+    perlin.SetLacunarity(0.5f);
 
 
     for (int x = 0; x < size_.x; ++x) {
