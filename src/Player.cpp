@@ -80,7 +80,7 @@ void Player::move()
     for(const auto& bb : cubes) {
         const auto prev = vel.y;
         vel.y = bb.clipAxisCollide<1, 0, 2>(box_, vel.y);
-        if (vel.y != prev) std::cout << "Clipped vertically!" << std::endl;
+        if (vel.y > prev) std::cout << "Clipped going down!" << std::endl;
     }
 
     box_ = box_.moved({ 0, vel.y, 0 });
@@ -134,6 +134,10 @@ void Player::tick()
 
     const bool jumpPressed = Input::getKey(GLFW_KEY_SPACE);
     const bool running = Input::getKey(GLFW_KEY_LEFT_SHIFT);
+    const bool fPressed = Input::getKey(GLFW_KEY_F);
+
+    if (fPressed && !wasFPressed_) flying_ = !flying_;
+    wasFPressed_ = fPressed;
 
     if (flying_)
         vel_.y = jumpPressed ? 0.1f : Input::getKey(GLFW_KEY_LEFT_CONTROL) ? -0.1f : 0;

@@ -14,6 +14,7 @@ class Player
     glm::vec3 vel_{};
     AABB box_{};
     bool onGround_{}, inWater_{}, flying_ = true;
+    bool wasFPressed_ = false;
 
 public:
 
