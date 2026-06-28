@@ -43,19 +43,21 @@ void Inventory::render()
         float x = i * ICON_SIZE + i * ICON_SPACING + ICONS_MARGIN;
         float color = (slot_ == i) ? 1.0f : 0.8f;
 
-        float u0 = (float)(slots_[i] - 1) / 16.0F;
+        const auto tex = blockInfo_->textureIndex(slots_[i], 2);
+
+        float u0 = (float)tex / 16.0F;
         float u1 = u0 + 0.0624375F;
         float v0 = 0.0F;
         float v1 = v0 + 0.0624375F;
 
         glColor4f(color, color, color, color);
-        glTexCoord2d(u0, v0);
-        glVertex2f(x, ICONS_MARGIN);
         glTexCoord2d(u0, v1);
+        glVertex2f(x, ICONS_MARGIN);
+        glTexCoord2d(u0, v0);
         glVertex2f(x, ICONS_MARGIN + ICON_SIZE);
-        glTexCoord2d(u1, v1);
-        glVertex2f(x + ICON_SIZE, ICONS_MARGIN + ICON_SIZE);
         glTexCoord2d(u1, v0);
+        glVertex2f(x + ICON_SIZE, ICONS_MARGIN + ICON_SIZE);
+        glTexCoord2d(u1, v1);
         glVertex2f(x + ICON_SIZE, ICONS_MARGIN);
     }
     glEnd();

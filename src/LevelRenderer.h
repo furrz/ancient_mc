@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "BlockInfo.h"
 #include "HitResult.h"
 #include "Player.h"
 
@@ -18,11 +19,12 @@ class LevelRenderer
     unsigned texture_;
     int chunkDrawLists_;
     int prevUpdated_{};
+    BlockInfo *blockInfo_;
 
     void drawTile(glm::ivec3 pos, int layer, int attribMask) const;
 
 public:
-    explicit LevelRenderer(Level *level);
+    explicit LevelRenderer(Level *level, BlockInfo *blockInfo);
     ~LevelRenderer();
     void rebuildChunk(const glm::ivec3 pos);
     void render(const Player *player);

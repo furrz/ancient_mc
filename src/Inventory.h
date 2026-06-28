@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
 
+#include "BlockInfo.h"
+
 
 class Inventory
 {
@@ -10,7 +12,10 @@ class Inventory
 
     uint8_t slot_ {};
 
+    BlockInfo *blockInfo_;
+
 public:
+    explicit Inventory(BlockInfo *blockInfo) : blockInfo_(blockInfo) {};
     void tick();
     [[nodiscard]] uint8_t getBlockId() const;
     void render();

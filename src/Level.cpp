@@ -5,25 +5,8 @@
 
 #include "BlockAttribs.h"
 
-Level::Level(int w, int h, int d) : size_(w, d, h)
+Level::Level(int w, int h, int d, BlockInfo *blockInfo) : size_(w, d, h), blockInfo_(blockInfo)
 {
-    std::ifstream in("res/block_material.txt");
-    if (!in.is_open()) {
-        std::cerr << "Could not load res/block_material.txt" << std::endl;
-    }
-
-    std::string token;
-    while (in >> token) {
-        if (token == "air")
-            blockAttribs_.emplace_back(0);
-        else if (token == "solid")
-            blockAttribs_.emplace_back(COLLIDABLE | PICKABLE | LIGHT_BLOCKER | DRAW_OPAQUE);
-        else if (token == "liquid")
-            blockAttribs_.emplace_back(BUOYANT | PICKABLE | DRAW_TRANSPARENT);
-        else std::cerr << "unrecognized material: " << token << std::endl;
-    }
-    in.close();
-
     blocks_.resize(w * h * d);
     lightDepths_.resize(w * h);
     if (!load()) generate();
@@ -59,7 +42,7 @@ void Level::generate()
     for (int x = 0; x < size_.x; ++x) {
         for (int y = 0; y < size_.y; ++y) {
             for (int z = 0; z < size_.z; ++z) {
-                block({ x, y, z }) = y < groundLevel ? 2 : y > groundLevel ? 0 : 1;
+                block({ x, y, z }) = y < groundLevel - 2 ? 1 : y < groundLevel ? 2 : y > groundLevel ? 0 : 3;
             }
         }
     }

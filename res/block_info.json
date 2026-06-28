@@ -1,0 +1,21 @@
+[
+  { "name": "Air", "attribs": [], "all": 0 },
+  { "name": "Stone", "attribs": ["DEFAULT"], "all": 1 },
+  { "name": "Dirt", "attribs": ["DEFAULT"],"all": 2 },
+  { "name": "Grass", "attribs": ["DEFAULT", "FOLIAGE_COLORING"], "all": 3, "top": 40 },
+  { "name": "Planks", "attribs": ["DEFAULT", "FLAMMABLE"], "all": 4 },
+  { "name": "Polished Stone", "attribs":  ["DEFAULT"], "all": 6 },
+  { "name": "Brick", "attribs": ["DEFAULT"], "all": 7 },
+  { "name": "TNT", "attribs":  ["DEFAULT", "FLAMMABLE"], "sides":  8, "top": 9, "bottom": 10 },
+  { "name": "Cobwebs", "attribs": ["PICKABLE", "DRAW_CUTOUT", "FLAMMABLE"], "all": 11 },
+  { "name": "Cobblestone", "attribs": ["DEFAULT"], "all": 16 },
+  { "name": "Bedrock", "attribs":  ["DEFAULT"], "all": 17 },
+  { "name": "Sand", "attribs": ["DEFAULT", "FALLING"], "all": 18 },
+  { "name": "Gravel", "attribs": ["DEFAULT", "FALLING"], "all": 19 },
+  { "name": "Logs", "attribs": ["DEFAULT", "FLAMMABLE"], "sides": 20, "top": 21, "bottom": 21 },
+  { "name": "Iron Block", "attribs": ["DEFAULT"], "all": 22 },
+  { "name": "Gold Block", "attribs": ["DEFAULT"], "all": 23 },
+  { "name": "Diamond Block", "attribs": ["DEFAULT"], "all": 24 },
+  { "name": "Chest", "attribs":  ["DEFAULT", "FLAMMABLE"], "sides": 26, "top": 25 },
+  { "name": "Water", "attribs": ["BUOYANT", "DRAW_TRANSPARENT"], "all": 205 }
+]

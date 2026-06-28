@@ -9,7 +9,7 @@
 #include "Level.h"
 
 
-LevelRenderer::LevelRenderer(Level *level) : level_(level), sizeInChunks_(level_->size() / CHUNK_SIZE)
+LevelRenderer::LevelRenderer(Level *level, BlockInfo *blockInfo) : level_(level), blockInfo_(blockInfo), sizeInChunks_(level_->size() / CHUNK_SIZE)
 {
     const int chunkCount = numChunks();
     chunksDirty_.resize(chunkCount);
@@ -92,14 +92,16 @@ inline bool checkFace(Level *level, const glm::ivec3 pos, const glm::ivec3 offse
     return false;
 }
 
+constexpr glm::vec2 uvMinFor(const uint8_t tex) {
+    return glm::vec2{
+        static_cast<float>(tex % 16) / 16.0f,
+        static_cast<float>(tex / 16) / 16.0f
+    };
+}
+
 void LevelRenderer::drawTile(const glm::ivec3 pos, int layer, int attribMask) const
 {
-    const auto tex = level_->block(pos) - 1;
 
-    const float u0 = static_cast<float>(tex) / 16.0F;
-    const float u1 = u0 + 0.0624375F;
-    constexpr float v0 = 0.0F;
-    constexpr float v1 = v0 + 0.0624375F;
     constexpr float c1 = 1.0F;
     constexpr float c2 = 0.8F;
     constexpr float c3 = 0.6F;
@@ -112,74 +114,103 @@ void LevelRenderer::drawTile(const glm::ivec3 pos, int layer, int attribMask) co
     float br;
 
     if (checkFace(level_, pos, { 0, -1, 0 }, attribMask, c1, layer, br)) {
+        const auto tex = blockInfo_->textureIndex(level_->block(pos), 0);
+        const auto uvMin = uvMinFor(tex);
+        const auto uvMax = uvMin + 0.0624375f;
+        
         glColor4f(br, br, br, 1.0f);
-        glTexCoord2f(u0, v1);
+        glTexCoord2f(uvMin.x, uvMax.y);
         glVertex3f(x0, y0, z1);
-        glTexCoord2f(u0, v0);
+        glTexCoord2f(uvMin.x, uvMin.y);
         glVertex3f(x0, y0, z0);
-        glTexCoord2f(u1, v0);
+        glTexCoord2f(uvMax.x, uvMin.y);
         glVertex3f(x1, y0, z0);
-        glTexCoord2f(u1, v1);
+        glTexCoord2f(uvMax.x, uvMax.y);
         glVertex3f(x1, y0, z1);
     }
 
     if (checkFace(level_, pos, { 0, 1, 0 }, attribMask, c1, layer, br)) {
-        glColor4f(br, br, br, 1.0f);
-        glTexCoord2f(u1, v1);
+        const auto tex = blockInfo_->textureIndex(level_->block(pos), 1);
+        const auto uvMin = uvMinFor(tex);
+        const auto uvMax = uvMin + 0.0624375f;
+
+        if (blockInfo_->attribs(level_->block(pos)) & FOLIAGE_COLORING) {
+            glColor4f(br * 140.0f / 255.0f, br * 250.0f / 255.0f, br * 130.0f / 255.0f, 1.0f);
+        } else {
+            glColor4f(br, br, br, 1.0f);
+        }
+
+        glTexCoord2f(uvMax.x, uvMax.y);
         glVertex3f(x1, y1, z1);
-        glTexCoord2f(u1, v0);
+        glTexCoord2f(uvMax.x, uvMin.y);
         glVertex3f(x1, y1, z0);
-        glTexCoord2f(u0, v0);
+        glTexCoord2f(uvMin.x, uvMin.y);
         glVertex3f(x0, y1, z0);
-        glTexCoord2f(u0, v1);
+        glTexCoord2f(uvMin.x, uvMax.y);
         glVertex3f(x0, y1, z1);
     }
 
     if (checkFace(level_, pos, { 0, 0, -1 }, attribMask, c2, layer, br)) {
+        const auto tex = blockInfo_->textureIndex(level_->block(pos), 2);
+        const auto uvMin = uvMinFor(tex);
+        const auto uvMax = uvMin + 0.0624375f;
+
         glColor4f(br, br, br, 1.0f);
-        glTexCoord2f(u1, v0);
+        glTexCoord2f(uvMax.x, uvMin.y);
         glVertex3f(x0, y1, z0);
-        glTexCoord2f(u0, v0);
+        glTexCoord2f(uvMin.x, uvMin.y);
         glVertex3f(x1, y1, z0);
-        glTexCoord2f(u0, v1);
+        glTexCoord2f(uvMin.x, uvMax.y);
         glVertex3f(x1, y0, z0);
-        glTexCoord2f(u1, v1);
+        glTexCoord2f(uvMax.x, uvMax.y);
         glVertex3f(x0, y0, z0);
     }
 
     if (checkFace(level_, pos, { 0, 0, 1 }, attribMask, c2, layer, br)) {
+        const auto tex = blockInfo_->textureIndex(level_->block(pos), 3);
+        const auto uvMin = uvMinFor(tex);
+        const auto uvMax = uvMin + 0.0624375f;
+
         glColor4f(br, br, br, 1.0f);
-        glTexCoord2f(u0, v0);
+        glTexCoord2f(uvMin.x, uvMin.y);
         glVertex3f(x0, y1, z1);
-        glTexCoord2f(u0, v1);
+        glTexCoord2f(uvMin.x, uvMax.y);
         glVertex3f(x0, y0, z1);
-        glTexCoord2f(u1, v1);
+        glTexCoord2f(uvMax.x, uvMax.y);
         glVertex3f(x1, y0, z1);
-        glTexCoord2f(u1, v0);
+        glTexCoord2f(uvMax.x, uvMin.y);
         glVertex3f(x1, y1, z1);
     }
 
     if (checkFace(level_, pos, { -1, 0, 0 }, attribMask, c3, layer, br)) {
+        const auto tex = blockInfo_->textureIndex(level_->block(pos), 4);
+        const auto uvMin = uvMinFor(tex);
+        const auto uvMax = uvMin + 0.0624375f;
+
         glColor4f(br, br, br, 1.0f);
-        glTexCoord2f(u1, v0);
+        glTexCoord2f(uvMax.x, uvMin.y);
         glVertex3f(x0, y1, z1);
-        glTexCoord2f(u0, v0);
+        glTexCoord2f(uvMin.x, uvMin.y);
         glVertex3f(x0, y1, z0);
-        glTexCoord2f(u0, v1);
+        glTexCoord2f(uvMin.x, uvMax.y);
         glVertex3f(x0, y0, z0);
-        glTexCoord2f(u1, v1);
+        glTexCoord2f(uvMax.x, uvMax.y);
         glVertex3f(x0, y0, z1);
     }
 
     if (checkFace(level_, pos, { 1, 0, 0 }, attribMask, c3, layer, br)) {
+        const auto tex = blockInfo_->textureIndex(level_->block(pos), 5);
+        const auto uvMin = uvMinFor(tex);
+        const auto uvMax = uvMin + 0.0624375f;
+
         glColor4f(br, br, br, 1.0f);
-        glTexCoord2f(u0, v1);
+        glTexCoord2f(uvMin.x, uvMax.y);
         glVertex3f(x1, y0, z1);
-        glTexCoord2f(u1, v1);
+        glTexCoord2f(uvMax.x, uvMax.y);
         glVertex3f(x1, y0, z0);
-        glTexCoord2f(u1, v0);
+        glTexCoord2f(uvMax.x, uvMin.y);
         glVertex3f(x1, y1, z0);
-        glTexCoord2f(u0, v0);
+        glTexCoord2f(uvMin.x, uvMin.y);
         glVertex3f(x1, y1, z1);
     }
 }

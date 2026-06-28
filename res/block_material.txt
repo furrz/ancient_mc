@@ -1,4 +1,0 @@
-air
-solid
-solid
-liquid

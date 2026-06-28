@@ -4,6 +4,7 @@
 
 #include "AABB.h"
 #include "BlockAttribs.h"
+#include "BlockInfo.h"
 
 using iv3range = std::pair<glm::ivec3, glm::ivec3>;
 
@@ -13,10 +14,10 @@ class Level
     std::vector<uint8_t> blocks_;
     std::vector<int> lightDepths_;
     std::vector<iv3range> dirtyRegions_;
-    std::vector<int> blockAttribs_;
+    BlockInfo *blockInfo_;
 
 public:
-    Level(int w, int h, int d);
+    Level(int w, int h, int d, BlockInfo *blockInfo);
     bool load();
     void generate();
     void save() const;
@@ -27,7 +28,7 @@ public:
 
     [[nodiscard]] int blockAttribs(const glm::ivec3 pos)
     {
-        return blockAttribs_[block(pos)];
+        return blockInfo_->attribs(block(pos));
     }
 
     [[nodiscard]] glm::ivec3 size() const { return size_; }

@@ -22,6 +22,7 @@ constexpr glm::vec3 fogColor { 14 / 255.0f, 11 / 255.0f, 10 / 255.0f };
 class App
 {
     GLFWwindow *window;
+    std::unique_ptr<BlockInfo> blockInfo;
     std::unique_ptr<Level> level;
     std::unique_ptr<LevelRenderer> levelRenderer;
     std::unique_ptr<Player> player;
@@ -69,10 +70,11 @@ public:
         if (glfwRawMouseMotionSupported())
             glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
-        level = std::make_unique<Level>(256, 256, 64);
+        blockInfo = std::make_unique<BlockInfo>();
+        level = std::make_unique<Level>(256, 256, 64, blockInfo.get());
         player = std::make_unique<Player>(level.get());
-        inventory = std::make_unique<Inventory>();
-        levelRenderer = std::make_unique<LevelRenderer>(level.get());
+        inventory = std::make_unique<Inventory>(blockInfo.get());
+        levelRenderer = std::make_unique<LevelRenderer>(level.get(), blockInfo.get());
     }
 
     void run()
