@@ -15,6 +15,8 @@ void Inventory::render()
 {
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_TEXTURE_2D);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
@@ -58,4 +60,5 @@ void Inventory::render()
     glPopMatrix();
 
     glEnable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
 }
