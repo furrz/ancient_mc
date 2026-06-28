@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "GZip.h"
+#include "read_json.h"
 
 Level::Level(const int w, const int h, const int d, BlockInfo *blockInfo) : size_(w, d, h), blockInfo_(blockInfo)
 {
@@ -26,12 +27,19 @@ bool Level::load()
 
 void Level::generate()
 {
-    const int groundLevel = size_.y * 2 / 3;
+    std::vector<std::pair<uint8_t, int>> layers;
+
+    const auto config = read_json("res/worldgen.json");
+    for (const auto& layer : config["layers"]) {
+        layers.emplace_back(blockInfo_->byID(layer["block"]), layer["y"]);
+    }
 
     for (int x = 0; x < size_.x; ++x) {
-        for (int y = 0; y < size_.y; ++y) {
-            for (int z = 0; z < size_.z; ++z) {
-                block({ x, y, z }) = y < groundLevel - 2 ? 1 : y < groundLevel ? 2 : y > groundLevel ? 0 : 3;
+        for (int z = 0; z < size_.z; ++z) {
+            int layer = 0;
+            for (int y = 0; y < size_.y; ++y) {
+                if (y > layers[layer].second) layer++;
+                block({ x, y, z }) = layers[layer].first;
             }
         }
     }

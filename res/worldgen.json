@@ -1,0 +1,9 @@
+{
+  "layers": [
+    { "block": "bedrock", "y": 0 },
+    { "block": "stone", "y": 37 },
+    { "block": "dirt", "y": 40 },
+    { "block": "grass", "y": 41 },
+    { "block": "air", "y": 99999 }
+  ]
+}
