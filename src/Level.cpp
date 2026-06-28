@@ -1,17 +1,24 @@
 #include "Level.h"
 
-#include <fstream>
-#include <iostream>
+#include <noise/noise.h>
 
+#include "ConVars.h"
 #include "GZip.h"
 #include "read_json.h"
 
-Level::Level(const int w, const int h, const int d, BlockInfo *blockInfo) : size_(w, d, h), blockInfo_(blockInfo)
+Level::Level(ConVars *conVars, const int w, const int h, const int d, BlockInfo *blockInfo) : size_(w, d, h), blockInfo_(blockInfo)
 {
+    conVars->setupVar("level_gen_force", "Force level regeneration even if a save file is found", &attrForceRegen_);
     blocks_.resize(w * h * d);
     lightDepths_.resize(w * h);
-    if (!load()) generate();
+}
 
+void Level::init() {
+    if (attrForceRegen_ || !load()) generate();
+
+    if (attrForceRegen_) {
+        std::cout << "Reminder: You have level_gen_force enabled! Saved level will be overwritten!" << std::endl;
+    }
 }
 
 bool Level::load()
@@ -27,19 +34,40 @@ bool Level::load()
 
 void Level::generate()
 {
-    std::vector<std::pair<uint8_t, int>> layers;
+    struct Layer {
+        uint8_t block;
+        int y;
+        float noiseAmount;
+        float noiseScale;
+        bool skippable;
+    };
+
+    std::vector<Layer> layers;
 
     const auto config = read_json("res/worldgen.json");
     for (const auto& layer : config["layers"]) {
-        layers.emplace_back(blockInfo_->byID(layer["block"]), layer["y"]);
+        layers.emplace_back(
+            blockInfo_->byID(layer.value<std::string>("block", "air")),
+            layer.value<int>("y", 999999),
+            layer.value<float>("noise", 0),
+            layer.value<float>("noiseScale", 1),
+            layer.value<bool>("skippable", false));
     }
+
+    const noise::module::Perlin perlin;
 
     for (int x = 0; x < size_.x; ++x) {
         for (int z = 0; z < size_.z; ++z) {
-            int layer = 0;
+            int layer = -1;
+            int nextY = -1;
+
             for (int y = 0; y < size_.y; ++y) {
-                if (y > layers[layer].second) layer++;
-                block({ x, y, z }) = layers[layer].first;
+                while (y > nextY) {
+                    layer++;
+                    nextY = layers[layer].y + static_cast<int>((perlin.GetValue(x * layers[layer].noiseScale, layer * layers[layer].noiseScale, z * layers[layer].noiseScale) + 1) / 2 * layers[layer].noiseAmount);
+                    if (!layers[layer].skippable) break;
+                }
+                block({ x, y, z }) = layers[layer].block;
             }
         }
     }

@@ -5,6 +5,7 @@
 #include "AABB.h"
 #include "BlockInfo.h"
 
+class ConVars;
 using iv3range = std::pair<glm::ivec3, glm::ivec3>;
 
 class Level
@@ -14,9 +15,11 @@ class Level
     std::vector<int> lightDepths_;
     std::vector<iv3range> dirtyRegions_;
     BlockInfo *blockInfo_;
+    bool attrForceRegen_ = false;
 
 public:
-    Level(int w, int h, int d, BlockInfo *blockInfo);
+    Level(ConVars *conVars, int w, int h, int d, BlockInfo *blockInfo);
+    void init();
     bool load();
     void generate();
     void save() const;
