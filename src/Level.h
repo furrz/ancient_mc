@@ -1,0 +1,66 @@
+#pragma once
+#include <vector>
+#include <glm/vec3.hpp>
+
+#include "AABB.h"
+#include "BlockAttribs.h"
+
+using iv3range = std::pair<glm::ivec3, glm::ivec3>;
+
+class Level
+{
+    glm::ivec3 size_;
+    std::vector<uint8_t> blocks_;
+    std::vector<int> lightDepths_;
+    std::vector<iv3range> dirtyRegions_;
+    std::vector<int> blockAttribs_;
+
+public:
+    Level(int w, int h, int d);
+    bool load();
+    void generate();
+    void save() const;
+    void setTile(glm::ivec3 pos, uint8_t blockId);
+    void calcLightDepths(int xA, int zA, int xB, int zB);
+    void dirty(glm::ivec3 min, glm::ivec3 max);
+    void getCubes(AABB aabb, std::vector<AABB>& cubes, int attribs);
+
+    [[nodiscard]] int blockAttribs(const glm::ivec3 pos)
+    {
+        return blockAttribs_[block(pos)];
+    }
+
+    [[nodiscard]] glm::ivec3 size() const { return size_; }
+
+    [[nodiscard]] uint8_t& block(const glm::ivec3 pos)
+    {
+        return blocks_[(pos.y * size_.y + pos.z) * size_.x + pos.x];
+    }
+
+    [[nodiscard]] uint8_t block(const glm::ivec3 pos) const
+    {
+        return blocks_[(pos.y * size_.y + pos.z) * size_.x + pos.x];
+    }
+
+    [[nodiscard]] const std::vector<iv3range>& dirtyRegions() const
+    {
+        return dirtyRegions_;
+    }
+
+    void clearDirtyRegions()
+    {
+        dirtyRegions_.clear();
+    }
+
+    [[nodiscard]] float getBrightness(const glm::ivec3 vec) const
+    {
+        constexpr float dark = 0.8F;
+        constexpr float light = 1.0F;
+
+        if (vec.x >= 0 && vec.y >= 0 && vec.z >= 0 && vec.x < size_.x && vec.y < size_.y && vec.z < size_.z) {
+            return vec.y < lightDepths_[vec.x + vec.z * size_.x] ? dark : light;
+        }
+
+        return light;
+    }
+};

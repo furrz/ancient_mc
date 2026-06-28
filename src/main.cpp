@@ -1,0 +1,266 @@
+#include <array>
+#include <memory>
+#include <optional>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include "Input.h"
+#include "Inventory.h"
+#include "Level.h"
+#include "LevelRenderer.h"
+#include "Player.h"
+
+constexpr int WIDTH = 1024;
+constexpr int HEIGHT = 768;
+constexpr glm::vec3 fogColor { 0.5, 0.8, 1.0 };
+
+
+class App
+{
+    GLFWwindow *window;
+    std::unique_ptr<Level> level;
+    std::unique_ptr<LevelRenderer> levelRenderer;
+    std::unique_ptr<Player> player;
+    std::unique_ptr<Inventory> inventory;
+    glm::dvec2 prevCursorPos{};
+    bool breakBlock{}, placeBlock{};
+
+    static void mouseButtonCallback(GLFWwindow* window, const int button, const int action, const int)
+    {
+        const auto app = static_cast<App*>(glfwGetWindowUserPointer(window));
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+            app->breakBlock = true;
+        else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+            app->placeBlock = true;
+    }
+
+public:
+    App()
+    {
+        glfwInit();
+
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 1);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+
+        window = glfwCreateWindow(WIDTH, HEIGHT, "Game", nullptr, nullptr);
+        Input::setWindow(window);
+        glfwSetMouseButtonCallback(window, mouseButtonCallback);
+        glfwMakeContextCurrent(window);
+
+        gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress));
+
+        /* initialize GL state */
+        glEnable(GL_TEXTURE_2D);
+        glShadeModel(GL_SMOOTH);
+        glClearColor(fogColor.x, fogColor.y, fogColor.z, 0.0f);
+        glClearDepth(1.0f);
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glMatrixMode(GL_MODELVIEW);
+
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        if (glfwRawMouseMotionSupported())
+            glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+
+        level = std::make_unique<Level>(256, 256, 64);
+        player = std::make_unique<Player>(level.get());
+        inventory = std::make_unique<Inventory>();
+        levelRenderer = std::make_unique<LevelRenderer>(level.get());
+    }
+
+    void run()
+    {
+        double prevTime = glfwGetTime();
+
+        glfwGetCursorPos(window, &prevCursorPos.x, &prevCursorPos.y);
+
+        while (!glfwWindowShouldClose(window)) {
+            glfwPollEvents();
+
+            // Compute time
+            const double newTime = glfwGetTime();
+            const double deltaTime = newTime - prevTime;
+            const int ticks = static_cast<int>(deltaTime / (1.0 / 20.0));
+
+            // Tick and Draw
+            for (int i = 0; i < ticks; ++i) tick();
+            render(static_cast<float>(deltaTime));
+
+            if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+                break;
+            }
+
+            prevTime = newTime;
+        }
+    }
+
+    void tick()
+    {
+        inventory->tick();
+        player->tick();
+    }
+
+    void render(const float delta)
+    {
+        // Compute mouse movement
+        glm::dvec2 cursorPos;
+        glfwGetCursorPos(window, &cursorPos.x, &cursorPos.y);
+        const auto cursorDelta = cursorPos - prevCursorPos;
+        prevCursorPos = cursorPos;
+
+        player->turn(cursorDelta);
+
+        const auto hitResult = pick(delta);
+
+        if (breakBlock) {
+            breakBlock = false;
+
+            if (hitResult) level->setTile(hitResult->pos, 0);
+        }
+
+        if (placeBlock) {
+            placeBlock = false;
+
+            if (hitResult) {
+
+                // determine where we actually hit
+                glm::ivec3 pos = hitResult->pos;
+                switch (hitResult->f) {
+                case 0: pos.y--; break;
+                case 1: pos.y++; break;
+                case 2: pos.z--; break;
+                case 3: pos.z++; break;
+                case 4: pos.x--; break;
+                case 5: pos.x++; break;
+                default: break;
+                }
+
+                level->setTile(pos, inventory->getBlockId());
+
+            }
+        }
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        setupCamera(delta);
+
+        levelRenderer->handleDirtyRegions();
+
+        glEnable(GL_CULL_FACE);
+        glEnable(GL_FOG);
+        glFogi(GL_FOG_MODE, GL_EXP);
+        glFogf(GL_FOG_DENSITY, 0.2f);
+        glFogfv(GL_FOG_COLOR, glm::value_ptr(fogColor));
+        glDisable(GL_BLEND);
+
+        // Draw all render layers
+        levelRenderer->render(player.get());
+
+
+        //Draw hit result
+        if (hitResult) {
+            glDisable(GL_TEXTURE_2D);
+            levelRenderer->renderHit(hitResult.value());
+            glEnable(GL_TEXTURE_2D);
+        }
+
+        inventory->render();
+        glfwSwapBuffers(window);
+    }
+
+    void setupCamera(const float delta)
+    {
+        glMatrixMode(GL_PROJECTION);
+
+        const glm::mat4 perspective = glm::perspective(glm::radians(70.0f), WIDTH / static_cast<float>(HEIGHT), 0.05f, 1000.0f);
+        glLoadMatrixf(glm::value_ptr(perspective));
+
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        moveCameraToPlayer(delta);
+    }
+
+    // pick a block
+    std::optional<HitResult> pick(const float delta)
+    {
+        std::array<unsigned, 2000> selectBuffer{};
+        glSelectBuffer(selectBuffer.size(), selectBuffer.data());
+        glRenderMode(GL_SELECT);
+
+        setupPickCamera(delta);
+        levelRenderer->pick(player.get());
+
+        const int hits = glRenderMode(GL_RENDER);
+
+        long closest{};
+        std::array<int, 10> names {};
+        int hitNameCount = 0;
+
+        int cursor = 0;
+        for (int i = 0; i < hits; i++) {
+            const int nameCount = static_cast<int>(selectBuffer[cursor++]);
+            const long minZ = selectBuffer[cursor++];
+            cursor++;
+
+            const long dist = minZ;
+            int j;
+            if (dist >= closest && i != 0) {
+                cursor += nameCount;
+            } else {
+                closest = dist;
+                hitNameCount = nameCount;
+
+                for (j = 0; j < nameCount; ++j) {
+                    names[j] = static_cast<int>(selectBuffer[cursor++]);
+                }
+            }
+        }
+
+        if (hitNameCount > 0)
+            return HitResult({ names[0], names[1], names[2] }, names[3], names[4]);
+
+        return std::nullopt;
+    }
+
+    // set up the projection matrices for picking
+    void setupPickCamera(const float delta)
+    {
+        glm::ivec4 viewportBuffer;
+        glGetIntegerv(GL_VIEWPORT, glm::value_ptr(viewportBuffer));
+
+        glMatrixMode(GL_PROJECTION);
+
+        const auto pick = glm::pickMatrix(glm::vec2{ WIDTH / 2.0f, HEIGHT / 2.0f }, glm::vec2{ 5.0f, 5.0f }, viewportBuffer);
+        const auto persp = glm::perspective(glm::radians(70.0f), static_cast<float>(WIDTH) / static_cast<float>(HEIGHT), 0.05f, 1000.0f);
+        glLoadMatrixf(glm::value_ptr(pick * persp));
+
+        glMatrixMode(GL_MODELVIEW);
+        moveCameraToPlayer(delta);
+    }
+
+    void moveCameraToPlayer(const float delta)
+    {
+        glTranslatef(0.0F, 0.0F, -0.3F);
+        glRotatef(player->rot().x, 1.0F, 0.0F, 0.0F);
+        glRotatef(player->rot().y, 0.0F, 1.0F, 0.0F);
+        const auto pos = player->posOld() + (player->pos() - player->posOld()) * delta;
+        glTranslatef(-pos.x, -pos.y, -pos.z);
+    }
+
+    ~App()
+    {
+        level->save();
+        glfwTerminate();
+    }
+};
+
+int main()
+{
+    App app;
+    app.run();
+
+    return 0;
+}

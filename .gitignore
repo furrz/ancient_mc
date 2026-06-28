@@ -1,0 +1,5 @@
+cmake-build-*
+.idea
+level.dat
+.DS_Store
+*.o
