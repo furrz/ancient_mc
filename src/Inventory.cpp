@@ -1,8 +1,13 @@
 #include <glad/glad.h>
 #include "Inventory.h"
 
+#include "Input.h"
+
 void Inventory::tick()
 {
+    if (Input::getKey(GLFW_KEY_1)) slot_ = 0;
+    if (Input::getKey(GLFW_KEY_2)) slot_ = 1;
+    if (Input::getKey(GLFW_KEY_3)) slot_ = 2;
     // TODO inventory tick
 }
 
