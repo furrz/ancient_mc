@@ -26,3 +26,6 @@ target_link_libraries(ancient_mc PRIVATE glad::glad)
 
 find_package(glfw3 CONFIG REQUIRED)
 target_link_libraries(ancient_mc PRIVATE glfw)
+
+find_package(Stb REQUIRED)
+target_include_directories(ancient_mc PRIVATE ${Stb_INCLUDE_DIR})

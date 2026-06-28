@@ -1,5 +1,7 @@
 #include "LevelRenderer.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 #include <iostream>
 #include <glad/glad.h>
 
@@ -11,6 +13,22 @@ LevelRenderer::LevelRenderer(Level *level) : level_(level), sizeInChunks_(level_
     const int chunkCount = numChunks();
     chunksDirty_.resize(chunkCount);
     chunkDrawLists_ = glGenLists(4 * chunkCount);
+
+    // Load terrain image
+    int w, h, nChannels;
+    const auto data = stbi_load("res/terrain.png", &w, &h, &nChannels, 4);
+
+    glGenTextures(1, &texture_);
+    glBindTexture(GL_TEXTURE_2D, texture_);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameterf(GL_TEXTURE_2D, 0x84FE /* anisotropy ext */, 4.0f);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+    stbi_image_free(data);
 }
 
 LevelRenderer::~LevelRenderer()
@@ -34,7 +52,7 @@ void LevelRenderer::rebuildChunk(const glm::ivec3 pos)
 
             glNewList(chunkDrawLists_ + index * 4 + offset, GL_COMPILE);
             glEnable(GL_TEXTURE_2D);
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             glBindTexture(GL_TEXTURE_2D, texture_);
             glBegin(GL_QUADS);
 
@@ -75,7 +93,7 @@ inline bool checkFace(Level *level, const glm::ivec3 pos, const glm::ivec3 offse
 
 void LevelRenderer::drawTile(const glm::ivec3 pos, int layer, int attribMask) const
 {
-    const auto tex = level_->block(pos);
+    const auto tex = level_->block(pos) - 1;
 
     const float u0 = static_cast<float>(tex) / 16.0F;
     const float u1 = u0 + 0.0624375F;
