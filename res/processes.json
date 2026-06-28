@@ -2,6 +2,7 @@
   "processes": [
     {
       "name": "grass_spread",
+      "type": "random",
       "interval": 2,
       "offset": 0,
       "repeat": 10,
@@ -12,13 +13,18 @@
     },
     {
       "name": "grass_die",
-      "interval": 2,
-      "offset": 1,
-      "repeat": 10,
+      "type": "ticked",
       "block": "grass",
       "above": "air",
       "invert_above": true,
       "set_block": "dirt"
+    },
+    {
+      "name": "water_flow_down",
+      "type": "ticked",
+      "block": "air",
+      "above": "water",
+      "set_block": "water"
     }
   ]
 }

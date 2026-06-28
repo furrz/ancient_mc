@@ -83,7 +83,15 @@ void Level::save() const
 void Level::setTile(const glm::ivec3 pos, const uint8_t blockId)
 {
     block(pos) = blockId;
-    dirty(pos - 1, pos + 1);
+    tickTile(pos);
+    tickTile(pos + glm::ivec3 { 1, 0, 0 });
+    tickTile(pos + glm::ivec3 { -1, 0, 0 });
+    tickTile(pos + glm::ivec3 { 0, 1, 0 });
+    tickTile(pos + glm::ivec3 { 0, -1, 0 });
+    tickTile(pos + glm::ivec3 { 0, -0, 1 });
+    tickTile(pos + glm::ivec3 { 0, -0, -1 });
+
+    dirty(glm::max(pos - 1, glm::ivec3{ 0, 0, 0 }), glm::min(pos + 1, size_ - 1));
 }
 
 void Level::calcLightDepths(const int xA, const int zA, const int xB, const int zB)

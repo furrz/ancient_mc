@@ -123,6 +123,7 @@ public:
         inventory->tick();
         player->tick();
         processes->tick(level.get(), player.get());
+        level->swapTickedBlocks();
     }
 
     void render(const float delta)

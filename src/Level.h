@@ -14,7 +14,9 @@ class Level
     std::vector<uint8_t> blocks_;
     std::vector<int> lightDepths_;
     std::vector<iv3range> dirtyRegions_;
+    std::vector<std::vector<glm::ivec3>> tickedBlocks_ { 2 };
     BlockInfo *blockInfo_;
+    int currentTickedBlocks_ = 0;
     bool attrForceRegen_ = false;
 
 public:
@@ -27,6 +29,7 @@ public:
     void calcLightDepths(int xA, int zA, int xB, int zB);
     void dirty(glm::ivec3 min, glm::ivec3 max);
     void getCubes(AABB aabb, std::vector<AABB>& cubes, int attribs);
+    void tickTile(glm::ivec3 pos) { if (inBounds(pos)) tickedBlocks_[currentTickedBlocks_].emplace_back(pos); }
 
     [[nodiscard]] int blockAttribs(const glm::ivec3 pos)
     {
@@ -53,6 +56,16 @@ public:
     void clearDirtyRegions()
     {
         dirtyRegions_.clear();
+    }
+
+    [[nodiscard]] const std::vector<glm::ivec3>& tickedBlocks() const {
+        return tickedBlocks_[(currentTickedBlocks_ + tickedBlocks_.size() - 1) % tickedBlocks_.size()];
+    }
+
+
+    void swapTickedBlocks() {
+        currentTickedBlocks_ = (currentTickedBlocks_ + 1) % tickedBlocks_.size();
+        tickedBlocks_[currentTickedBlocks_].clear();
     }
 
     /// Check if a block coordinate is within the level bounds.
