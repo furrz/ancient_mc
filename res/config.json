@@ -1,6 +1,6 @@
 {
-    "level_gen_force": {
-        "description": "Force level regeneration even if a save file is found",
+    "app_force_reset_database": {
+        "description": "Forcibly erase game.db at startup, erasing the world map and progress.",
         "value": false
     },
     "player_phys_speed_running": {

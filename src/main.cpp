@@ -25,6 +25,7 @@ class App
 {
     GLFWwindow *window;
     std::unique_ptr<ConVars> conVars_;
+    std::unique_ptr<leveldb::DB> db_;
     std::unique_ptr<BlockInfo> blockInfo;
     std::unique_ptr<Level> level;
     std::unique_ptr<LevelRenderer> levelRenderer;
@@ -33,6 +34,8 @@ class App
     std::unique_ptr<LevelProcesses> processes;
     glm::dvec2 prevCursorPos{};
     bool breakBlock{}, placeBlock{};
+
+    bool attrForceResetDatabase_ = false;
 
     static void mouseButtonCallback(GLFWwindow *window, const int button, const int action, const int)
     {
@@ -75,17 +78,35 @@ public:
             glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
         conVars_ = std::make_unique<ConVars>();
+        conVars_->load();
+
+        conVars_->setupVar("app_force_reset_database",
+            "Forcibly erase game.db at startup, erasing the world map and progress.",
+            &attrForceResetDatabase_);
+
+        // Force delete database if requested
+        if (attrForceResetDatabase_) {
+            std::cerr << "You have app_force_reset_database enabled. Deleting level.db." << std::endl;
+            std::filesystem::remove_all("level.db");
+        }
+
+        // Load database
+        leveldb::DB *db_tmp;
+        leveldb::Options options;
+        options.create_if_missing = true;
+        leveldb::Status status = leveldb::DB::Open(options, "level.db", &db_tmp);
+        db_ = std::unique_ptr<leveldb::DB>(db_tmp);
+
         blockInfo = std::make_unique<BlockInfo>();
-        level = std::make_unique<Level>(conVars_.get(), 256, 256, 256, blockInfo.get());
-        player = std::make_unique<Player>(conVars_.get(), level.get());
+        level = std::make_unique<Level>(db_.get(), conVars_.get(), 256, 256, 256, blockInfo.get());
+        player = std::make_unique<Player>(db_.get(), conVars_.get(), level.get());
         inventory = std::make_unique<Inventory>(blockInfo.get());
         levelRenderer = std::make_unique<LevelRenderer>(conVars_.get(), level.get(), blockInfo.get());
         processes = std::make_unique<LevelProcesses>(conVars_.get(), blockInfo.get());
 
-        conVars_->load();
         conVars_->save();
 
-        level->init();
+        conVars_->validateNoPendingEntries();
 
         if (level->justGenerated())
             processes->runWorldGenProcesses(level.get());
@@ -297,6 +318,7 @@ public:
     ~App()
     {
         level->save();
+        player->save();
         conVars_->save();
         glfwTerminate();
     }

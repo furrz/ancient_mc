@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <leveldb/db.h>
 
 #include "AABB.h"
 
@@ -9,6 +10,7 @@ class Level;
 class Player
 {
     Level *level_;
+    leveldb::DB *db_;
     glm::vec2 rot_{};
     glm::vec3 pos_{};
     glm::vec3 posOld_{};
@@ -35,8 +37,8 @@ class Player
     float attrPlayerHalfHeight_ = 0.9f;
 
 public:
-
-    explicit Player(ConVars *conVars, Level *level);
+    explicit Player(leveldb::DB *db, ConVars *conVars, Level *level);
+    void save() const;
     void resetPos();
     void setPos(glm::vec3 pos);
 

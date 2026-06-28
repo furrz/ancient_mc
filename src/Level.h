@@ -9,11 +9,8 @@
 class ConVars;
 using iv3range = std::pair<glm::ivec3, glm::ivec3>;
 
-namespace leveldb { class DB; }
-
 class Level
 {
-    std::unique_ptr<leveldb::DB> db_{};
     glm::ivec3 size_;
     std::vector<uint8_t> blocks_;
     std::vector<int> lightDepths_;
@@ -23,10 +20,10 @@ class Level
     int currentTickedBlocks_ = 0;
     bool attrForceRegen_ = false;
     bool justGenerated_ = false;
+    leveldb::DB * db_;
 
 public:
-    Level(ConVars *conVars, int w, int h, int d, BlockInfo *blockInfo);
-    void init();
+    Level(leveldb::DB *db, ConVars *conVars, int w, int h, int d, BlockInfo *blockInfo);
     bool load();
     void generate();
     void save() const;

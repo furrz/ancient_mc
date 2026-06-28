@@ -12,7 +12,9 @@
 #include "Input.h"
 #include "Level.h"
 
-Player::Player(ConVars *conVars, Level *level)
+struct SavedState { glm::vec3 pos; glm::vec3 vel; glm::vec2 rot; };
+
+Player::Player(leveldb::DB *db, ConVars *conVars, Level *level) : db_(db)
 {
     conVars->setupVar("player_phys_speed_running", "Player Running Speed", &attrSpeedRunning_);
     conVars->setupVar("player_phys_speed_walking", "Player Walking Speed", &attrSpeedWalking_);
@@ -33,7 +35,24 @@ Player::Player(ConVars *conVars, Level *level)
     conVars->setupVar("player_state_flying", "Player is Flying", &flying_, ConVars::SaveType::None);
 
     level_ = level;
-    resetPos();
+    std::string saved_pos_bytes;
+    if (db_->Get({}, "playerState", &saved_pos_bytes).ok()) {
+        SavedState savedPos{};
+        memcpy(&savedPos, saved_pos_bytes.data(), sizeof(savedPos));
+        setPos(savedPos.pos);
+        vel_ = savedPos.vel;
+        rot_ = savedPos.rot;
+    } else {
+        resetPos();
+    }
+}
+
+void Player::save() const
+{
+    SavedState state {
+        pos_, vel_, rot_
+    };
+    db_->Put({}, "playerState", { reinterpret_cast<const char *>(&state), sizeof(state) });
 }
 
 void Player::resetPos()

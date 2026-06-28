@@ -1,7 +1,9 @@
 #pragma once
 #include <map>
 #include <string>
+#include <unordered_map>
 #include <vector>
+#include <nlohmann/json.hpp>
 
 namespace cv_internal {
 enum class CVType
@@ -46,30 +48,21 @@ private:
     std::map<std::string, Entry> entries_;
     std::vector<std::string> gameConfigKeys_;
     std::vector<std::string> userPrefsKeys_;
+    std::map<std::string, nlohmann::json> pendingEntries_;
 
     void loadFile(const char *path);
     void saveFile(const char *path, const std::vector<std::string>& keys);
+    void setupVarGeneral(const std::string& name, const char *description, void *storage, SaveType saveType, cv_internal::CVType cvType);
 
 public:
+
     template<typename T>
     void setupVar(const std::string& name, const char *description, T *storage, const SaveType saveType = SaveType::GameConfig)
     {
-        switch (saveType) {
-        case SaveType::GameConfig:
-            gameConfigKeys_.push_back(name);
-            break;
-        case SaveType::UserPrefs:
-            userPrefsKeys_.push_back(name);
-            break;
-        default: break;
-        }
-
-        entries_.emplace(name,
-                         Entry{
-                             description, storage, cv_internal::getType<T>()
-                         });
+        setupVarGeneral(name, description, storage, saveType, cv_internal::getType<T>());
     }
 
     void load();
     void save();
+    void validateNoPendingEntries();
 };

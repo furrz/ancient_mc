@@ -5,27 +5,13 @@
 
 #include "ConVars.h"
 #include "read_json.h"
+#include "rng.h"
 
-Level::Level(ConVars *conVars, const int w, const int h, const int d, BlockInfo *blockInfo) : size_(w, d, h), blockInfo_(blockInfo)
+Level::Level(leveldb::DB *db, ConVars *conVars, const int w, const int h, const int d, BlockInfo *blockInfo) : size_(w, d, h), blockInfo_(blockInfo), db_(db)
 {
-    conVars->setupVar("level_gen_force", "Force level regeneration even if a save file is found", &attrForceRegen_);
     blocks_.resize(w * h * d);
     lightDepths_.resize(w * h);
-}
-
-void Level::init() {
-    leveldb::DB *db_tmp;
-    leveldb::Options options;
-    options.create_if_missing = true;
-    leveldb::Status status = leveldb::DB::Open(options, "level.db", &db_tmp);
-
-    db_ = std::unique_ptr<leveldb::DB>(db_tmp);
-
-    if (attrForceRegen_ || !load()) generate();
-
-    if (attrForceRegen_) {
-        std::cout << "Reminder: You have level_gen_force enabled! Saved level will be overwritten!" << std::endl;
-    }
+    if (!load()) generate();
 }
 
 bool Level::load()
@@ -70,11 +56,10 @@ void Level::generate()
     // surface layer - grass, sand, dirt
     // features
 
-
     noise::module::Perlin perlin;
     perlin.SetOctaveCount(8);
     perlin.SetLacunarity(0.5f);
-
+    perlin.SetSeed(RNG::randomInt());
 
     for (int x = 0; x < size_.x; ++x) {
         for (int z = 0; z < size_.z; ++z) {
