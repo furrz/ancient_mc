@@ -94,8 +94,12 @@ void Player::move()
 
     auto vel = vel_;
     const auto org = vel_;
-    level_->getCubes(box_.expanded(vel), cubes, COLLIDABLE);
-    level_->getCubes(box_.expanded(vel), buoyantCubes, BUOYANT);
+
+    if (!noClip_) {
+        level_->getCubes(box_.expanded(vel), cubes, COLLIDABLE);
+        level_->getCubes(box_.expanded(vel), buoyantCubes, BUOYANT);
+    }
+
 
     // Handle collision with blocks
     for(const auto& bb : cubes) {
@@ -154,9 +158,12 @@ void Player::tick()
     const bool jumpPressed = Input::getKey(GLFW_KEY_SPACE);
     const bool running = Input::getKey(GLFW_KEY_LEFT_SHIFT);
     const bool fPressed = Input::getKey(GLFW_KEY_F);
+    const bool nPressed = Input::getKey(GLFW_KEY_N);
 
     if (fPressed && !wasFPressed_) flying_ = !flying_;
     wasFPressed_ = fPressed;
+    if (nPressed && !wasNPressed_) noClip_ = !noClip_;
+    wasNPressed_ = nPressed;
 
     if (flying_)
         vel_.y = jumpPressed ? attrFlyingSpeed_ : Input::getKey(GLFW_KEY_LEFT_CONTROL) ? -attrFlyingSpeed_ : 0;

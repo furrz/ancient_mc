@@ -16,8 +16,8 @@ class Player
     glm::vec3 posOld_{};
     glm::vec3 vel_{};
     AABB box_{};
-    bool onGround_{}, inWater_{}, flying_ = false;
-    bool wasFPressed_ = false;
+    bool onGround_{}, inWater_{}, flying_ = false, noClip_ = false;
+    bool wasFPressed_ = false, wasNPressed_ = false;
 
     float attrSpeedRunning_ = 0.035f;
     float attrSpeedWalking_ = 0.02F;
