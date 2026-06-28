@@ -233,13 +233,13 @@ void LevelRenderer::render(const Player *player)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     for (const auto pos: visibleChunks) {
-        glCallList(chunkDrawLists_ + chunkIndex(pos) * 4 + 2);
+        glCallList(chunkDrawLists_ + chunkIndex(pos) * 4 + 3);
     }
 
     // Pass 4: Brightly Lit Transparent
     glDisable(GL_FOG);
     for (const auto pos: visibleChunks) {
-        glCallList(chunkDrawLists_ + chunkIndex(pos) * 4 + 3);
+        glCallList(chunkDrawLists_ + chunkIndex(pos) * 4 + 2);
     }
 }
 
