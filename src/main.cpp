@@ -88,7 +88,7 @@ public:
             // Compute time
             const double newTime = glfwGetTime();
             const double deltaTime = newTime - prevTime;
-            passedTimeInTicks += deltaTime * 20;
+            passedTimeInTicks += deltaTime * 60;
             const int ticks = static_cast<int>(passedTimeInTicks);
             passedTimeInTicks -= ticks;
 
