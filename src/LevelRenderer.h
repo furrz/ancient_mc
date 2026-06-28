@@ -20,6 +20,7 @@ class LevelRenderer
     int chunkDrawLists_;
     BlockInfo *blockInfo_;
     int attrMaxChunkRebuildsPerFrame_ = 4;
+    int attrRenderDistance_ = 8;
 
     void drawTile(glm::ivec3 pos, int layer, int attribMask) const;
 

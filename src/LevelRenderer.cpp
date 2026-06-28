@@ -16,6 +16,7 @@ LevelRenderer::LevelRenderer(ConVars *conVars, Level *level, BlockInfo *blockInf
       blockInfo_(blockInfo) {
 
     conVars->setupVar("renderer_max_chunk_rebuilds_per_frame", "Maximum number of chunks that can be rebuilt (mesh generated) per render frame", &attrMaxChunkRebuildsPerFrame_);
+    conVars->setupVar("renderer_render_distance", "Render Distance in chunks", &attrRenderDistance_);
 
     const int chunkCount = numChunks();
     chunksDirty_.resize(chunkCount);
@@ -222,11 +223,17 @@ void LevelRenderer::render(const Player *player) {
     static std::vector<glm::ivec3> visibleChunks;
     visibleChunks.clear();
 
+    glm::ivec3 myChunk = glm::ivec3(player->pos()) / CHUNK_SIZE;
+
     // Todo: Frustum Cull
     for (int x = 0; x < sizeInChunks_.x; x++) {
         for (int z = 0; z < sizeInChunks_.z; z++) {
             for (int y = 0; y < sizeInChunks_.y; y++) {
-                visibleChunks.emplace_back(x, y, z);
+                const auto diff = glm::abs(myChunk - glm::ivec3 { x, y, z });
+                const auto dist = diff.x + diff.y + diff.z;
+
+                if (dist <= attrRenderDistance_)
+                    visibleChunks.emplace_back(x, y, z);
             }
         }
     }

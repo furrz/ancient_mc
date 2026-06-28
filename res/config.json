@@ -62,5 +62,9 @@
     "renderer_max_chunk_rebuilds_per_frame": {
         "description": "Maximum number of chunks that can be rebuilt (mesh generated) per render frame",
         "value": 4
+    },
+    "renderer_render_distance": {
+        "description": "Render Distance in chunks",
+        "value": 8
     }
 }
