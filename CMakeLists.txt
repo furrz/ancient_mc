@@ -25,6 +25,8 @@ add_executable(ancient_mc src/main.cpp
         src/ConVars.h
         src/GZip.cpp
         src/GZip.h
+        src/LevelProcesses.cpp
+        src/LevelProcesses.h
 )
 
 find_package(glm CONFIG REQUIRED)

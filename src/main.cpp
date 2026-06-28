@@ -10,6 +10,7 @@
 #include "Input.h"
 #include "Inventory.h"
 #include "Level.h"
+#include "LevelProcesses.h"
 #include "LevelRenderer.h"
 #include "Player.h"
 #include "rng.h"
@@ -29,6 +30,7 @@ class App
     std::unique_ptr<LevelRenderer> levelRenderer;
     std::unique_ptr<Player> player;
     std::unique_ptr<Inventory> inventory;
+    std::unique_ptr<LevelProcesses> processes;
     glm::dvec2 prevCursorPos{};
     bool breakBlock{}, placeBlock{};
 
@@ -78,6 +80,7 @@ public:
         player = std::make_unique<Player>(conVars_.get(), level.get());
         inventory = std::make_unique<Inventory>(blockInfo.get());
         levelRenderer = std::make_unique<LevelRenderer>(conVars_.get(), level.get(), blockInfo.get());
+        processes = std::make_unique<LevelProcesses>(conVars_.get(), blockInfo.get());
 
         conVars_->load();
         conVars_->save();
@@ -119,6 +122,7 @@ public:
     {
         inventory->tick();
         player->tick();
+        processes->tick(level.get(), player.get());
     }
 
     void render(const float delta)

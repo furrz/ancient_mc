@@ -1,0 +1,24 @@
+{
+  "processes": [
+    {
+      "name": "grass_spread",
+      "interval": 2,
+      "offset": 0,
+      "repeat": 10,
+      "block": "dirt",
+      "above": "air",
+      "beside": "grass",
+      "set_block": "grass"
+    },
+    {
+      "name": "grass_die",
+      "interval": 2,
+      "offset": 1,
+      "repeat": 10,
+      "block": "grass",
+      "above": "air",
+      "invert_above": true,
+      "set_block": "dirt"
+    }
+  ]
+}
