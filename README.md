@@ -1,5 +1,7 @@
 # ancient-mc
 
+<img src="screenshot.png" width="300">
+
 MC-clone based loosely off of RD-132211 ported to C++.
 
 Very heavily modified from that state - new save file format,
