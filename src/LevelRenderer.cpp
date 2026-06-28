@@ -6,13 +6,17 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "ConVars.h"
 #include "Level.h"
 
 
-LevelRenderer::LevelRenderer(Level *level, BlockInfo *blockInfo)
+LevelRenderer::LevelRenderer(ConVars *conVars, Level *level, BlockInfo *blockInfo)
     : level_(level),
       sizeInChunks_(level_->size() / CHUNK_SIZE),
       blockInfo_(blockInfo) {
+
+    conVars->setupVar("max_chunk_rebuilds_per_frame", "Maximum number of chunks that can be rebuilt (mesh generated) per render frame", &attrMaxChunkRebuildsPerFrame_);
+
     const int chunkCount = numChunks();
     chunksDirty_.resize(chunkCount);
     chunkDrawLists_ = glGenLists(4 * chunkCount);
@@ -232,7 +236,7 @@ void LevelRenderer::render(const Player *player) {
     for (const auto pos: visibleChunks) {
         if (chunksDirty_[chunkIndex(pos)]) {
             rebuildChunk(pos);
-            if (++updatedCount >= 4) break;
+            if (++updatedCount >= attrMaxChunkRebuildsPerFrame_) break;
         }
     }
 

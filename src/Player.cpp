@@ -5,32 +5,32 @@
 #include "rng.h"
 
 #include <algorithm>
-#include <iostream>
 #include <vector>
 #include <GLFW/glfw3.h>
 
+#include "ConVars.h"
 #include "Input.h"
 #include "Level.h"
 
-constexpr float SPEED_RUNNING = 0.035f;
-constexpr float SPEED_WALKING = 0.02F;
-constexpr float SPEED_IN_AIR = 0.005F;
-constexpr float DRAG_HORIZONTAL = 0.91F;
-constexpr float DRAG_VERTICAL = 0.98F;
-constexpr float DRAG_GROUNDED_HORIZONTAL = 0.8F;
-constexpr float GRAVITY = 0.005;
-constexpr float JUMP_VELOCITY = 0.12F;
-constexpr float FLYING_SPEED = 0.1f;
-constexpr float SWIM_UPWARD_MAX_VELOCITY = 0.07f;
-constexpr float SWIM_UPWARD_ACCELERATION = 0.01f;
-constexpr float LOOK_SPEED = 0.15;
-constexpr float MAX_PITCH_ANGLE = 90.0f;
-constexpr float PLAYER_RADIUS = 0.3f;
-constexpr float PLAYER_HALF_HEIGHT = 0.9f;
-constexpr float GRAVITY_IN_WATER = 0.4f;
-
-Player::Player(Level *level)
+Player::Player(ConVars *conVars, Level *level)
 {
+    conVars->setupVar("speed_running", "Player Running Speed", &attrSpeedRunning_);
+    conVars->setupVar("speed_walking", "Player Walking Speed", &attrSpeedWalking_);
+    conVars->setupVar("speed_in_air", "Player Speed In Air", &attrSpeedInAir_);
+    conVars->setupVar("flying_speed", "Player Flying Speed", &attrFlyingSpeed_);
+    conVars->setupVar("drag_horizontal", "Player Horizontal Drag Coefficient", &attrDragHorizontal_);
+    conVars->setupVar("drag_vertical", "Player Vertical Drag Coefficient", &attrDragVertical_);
+    conVars->setupVar("drag_grounded_horizontal", "Player Additional Horizontal Drag while Grounded", &attrDragGroundedHorizontal_);
+    conVars->setupVar("jump_velocity", "Player Jump Velocity", &attrJumpVelocity_);
+    conVars->setupVar("gravity", "Player Gravity", &attrGravity_);
+    conVars->setupVar("gravity_in_water", "Player Gravity in Water", &attrGravityInWater_);
+    conVars->setupVar("swim_upward_max_velocity", "Player Maximum Velocity while Swimming Upward", &attrSwimUpwardMaxVelocity_);
+    conVars->setupVar("swim_upward_acceleration", "Player Acceleration while Swimming Upward", &attrSwimUpwardAcceleration_);
+    conVars->setupVar("mouse_look_speed", "Mouse Look Sensitivity", &attrMouseLookSpeed_);
+    conVars->setupVar("max_pitch_angle", "Maximum Upward/Downward Look Angle", &attrMaxPitchAngle_);
+    conVars->setupVar("player_radius", "Player Hitbox Half-Width", &attrPlayerRadius_);
+    conVars->setupVar("player_half_height", "Player Hitbox Half-Height", &attrPlayerHalfHeight_);
+
     level_ = level;
     resetPos();
 }
@@ -45,11 +45,11 @@ void Player::resetPos()
 
 void Player::setPos(const glm::vec3 pos)
 {
+    const glm::vec3 size { attrPlayerRadius_, attrPlayerHalfHeight_, attrPlayerRadius_ };
+
     pos_ = pos;
     posOld_ = pos;
-    constexpr glm::vec3 SIZE { PLAYER_RADIUS, PLAYER_HALF_HEIGHT, PLAYER_RADIUS };
-
-    box_ = AABB { pos - SIZE, pos + SIZE };
+    box_ = AABB { pos - size, pos + size };
 }
 
 void Player::moveRelative(glm::vec2 movement, const float speed)
@@ -139,38 +139,38 @@ void Player::tick()
     wasFPressed_ = fPressed;
 
     if (flying_)
-        vel_.y = jumpPressed ? FLYING_SPEED : Input::getKey(GLFW_KEY_LEFT_CONTROL) ? -FLYING_SPEED : 0;
+        vel_.y = jumpPressed ? attrFlyingSpeed_ : Input::getKey(GLFW_KEY_LEFT_CONTROL) ? -attrFlyingSpeed_ : 0;
     else if (jumpPressed && onGround_ && !inWater_)
-        vel_.y += JUMP_VELOCITY;
+        vel_.y += attrJumpVelocity_;
     else if (jumpPressed && inWater_) {
-        if (vel_.y < SWIM_UPWARD_MAX_VELOCITY) {
-            vel_.y += SWIM_UPWARD_ACCELERATION;
+        if (vel_.y < attrSwimUpwardMaxVelocity_) {
+            vel_.y += attrSwimUpwardAcceleration_;
         }
     }
 
-    moveRelative(movement, (onGround_ || flying_) ? (running ? SPEED_RUNNING : SPEED_WALKING) : SPEED_IN_AIR);
+    moveRelative(movement, (onGround_ || flying_) ? (running ? attrSpeedRunning_ : attrSpeedWalking_) : attrSpeedInAir_);
 
     if (!flying_) {
-        vel_.y = vel_.y - GRAVITY * (inWater_ ? GRAVITY_IN_WATER : 1.0f);
+        vel_.y = vel_.y - attrGravity_ * (inWater_ ? attrGravityInWater_ : 1.0f);
     }
 
     move();
-    vel_.x *= DRAG_HORIZONTAL;
-    vel_.y *= DRAG_VERTICAL;
-    vel_.z *= DRAG_HORIZONTAL;
+    vel_.x *= attrDragHorizontal_;
+    vel_.y *= attrDragVertical_;
+    vel_.z *= attrDragHorizontal_;
 
     if (onGround_ || flying_) {
-        vel_.x *= DRAG_GROUNDED_HORIZONTAL;
-        vel_.z *= DRAG_GROUNDED_HORIZONTAL;
+        vel_.x *= attrDragGroundedHorizontal_;
+        vel_.z *= attrDragGroundedHorizontal_;
     }
 
 }
 
 void Player::turn(const glm::vec2 vec)
 {
-    rot_.y = rot_.y + vec.x * LOOK_SPEED;
-    rot_.x = rot_.x - vec.y * LOOK_SPEED;
+    rot_.y = rot_.y + vec.x * attrMouseLookSpeed_;
+    rot_.x = rot_.x - vec.y * attrMouseLookSpeed_;
 
-    rot_.x = std::max(rot_.x, -MAX_PITCH_ANGLE);
-    rot_.x = std::min(rot_.x, MAX_PITCH_ANGLE);
+    rot_.x = std::max(rot_.x, -attrMaxPitchAngle_);
+    rot_.x = std::min(rot_.x, attrMaxPitchAngle_);
 }

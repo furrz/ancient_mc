@@ -3,6 +3,7 @@
 
 #include "AABB.h"
 
+class ConVars;
 class Level;
 
 class Player
@@ -16,9 +17,26 @@ class Player
     bool onGround_{}, inWater_{}, flying_ = false;
     bool wasFPressed_ = false;
 
+    float attrSpeedRunning_ = 0.035f;
+    float attrSpeedWalking_ = 0.02F;
+    float attrSpeedInAir_ = 0.005F;
+    float attrDragHorizontal_ = 0.91F;
+    float attrDragVertical_ = 0.98F;
+    float attrDragGroundedHorizontal_ = 0.8F;
+    float attrGravity_ = 0.005;
+    float attrGravityInWater_ = 0.4f;
+    float attrJumpVelocity_ = 0.12F;
+    float attrFlyingSpeed_ = 0.1f;
+    float attrSwimUpwardMaxVelocity_ = 0.07f;
+    float attrSwimUpwardAcceleration_ = 0.01f;
+    float attrMouseLookSpeed_ = 0.15;
+    float attrMaxPitchAngle_ = 90.0f;
+    float attrPlayerRadius_ = 0.3f;
+    float attrPlayerHalfHeight_ = 0.9f;
+
 public:
 
-    explicit Player(Level *level);
+    explicit Player(ConVars *conVars, Level *level);
     void resetPos();
     void setPos(glm::vec3 pos);
 

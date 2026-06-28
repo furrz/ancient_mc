@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "ConVars.h"
 #include "Input.h"
 #include "Inventory.h"
 #include "Level.h"
@@ -22,6 +23,7 @@ constexpr glm::vec3 fogColor{ 14 / 255.0f, 11 / 255.0f, 10 / 255.0f };
 class App
 {
     GLFWwindow *window;
+    std::unique_ptr<ConVars> conVars_;
     std::unique_ptr<BlockInfo> blockInfo;
     std::unique_ptr<Level> level;
     std::unique_ptr<LevelRenderer> levelRenderer;
@@ -70,11 +72,14 @@ public:
         if (glfwRawMouseMotionSupported())
             glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
+        conVars_ = std::make_unique<ConVars>();
         blockInfo = std::make_unique<BlockInfo>();
         level = std::make_unique<Level>(256, 256, 64, blockInfo.get());
-        player = std::make_unique<Player>(level.get());
+        player = std::make_unique<Player>(conVars_.get(), level.get());
         inventory = std::make_unique<Inventory>(blockInfo.get());
-        levelRenderer = std::make_unique<LevelRenderer>(level.get(), blockInfo.get());
+        levelRenderer = std::make_unique<LevelRenderer>(conVars_.get(), level.get(), blockInfo.get());
+        conVars_->load();
+        conVars_->save();
     }
 
     void run()

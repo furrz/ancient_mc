@@ -19,11 +19,12 @@ class LevelRenderer
     unsigned texture_;
     int chunkDrawLists_;
     BlockInfo *blockInfo_;
+    int attrMaxChunkRebuildsPerFrame_ = 4;
 
     void drawTile(glm::ivec3 pos, int layer, int attribMask) const;
 
 public:
-    explicit LevelRenderer(Level *level, BlockInfo *blockInfo);
+    explicit LevelRenderer(ConVars *conVars, Level *level, BlockInfo *blockInfo);
     ~LevelRenderer();
     void rebuildChunk(glm::ivec3 pos);
     void render(const Player *player);
