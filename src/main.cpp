@@ -106,8 +106,7 @@ public:
         }
     }
 
-    void tick()
-    {
+    void tick() const {
         inventory->tick();
         player->tick();
     }
@@ -179,8 +178,7 @@ public:
         glfwSwapBuffers(window);
     }
 
-    void setupCamera(const float delta)
-    {
+    void setupCamera(const float delta) const {
         glMatrixMode(GL_PROJECTION);
         const auto aspect = WIDTH / static_cast<float>(HEIGHT);
         const glm::mat4 perspective = glm::perspective(
@@ -196,8 +194,7 @@ public:
 
 
     // set up the projection matrices for picking
-    void setupPickCamera(const float delta)
-    {
+    void setupPickCamera(const float delta) const {
         glm::ivec4 viewportBuffer;
         glGetIntegerv(GL_VIEWPORT, glm::value_ptr(viewportBuffer));
 
@@ -261,8 +258,7 @@ public:
         return std::nullopt;
     }
 
-    void moveCameraToPlayer(const float delta)
-    {
+    void moveCameraToPlayer(const float delta) const {
         glTranslatef(0.0F, 0.0F, -0.3F);
         glRotatef(player->rot().x, 1.0F, 0.0F, 0.0F);
         glRotatef(player->rot().y, 0.0F, 1.0F, 0.0F);

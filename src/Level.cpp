@@ -5,7 +5,7 @@
 
 #include "BlockAttribs.h"
 
-Level::Level(int w, int h, int d, BlockInfo *blockInfo) : size_(w, d, h), blockInfo_(blockInfo)
+Level::Level(const int w, const int h, const int d, BlockInfo *blockInfo) : size_(w, d, h), blockInfo_(blockInfo)
 {
     blocks_.resize(w * h * d);
     lightDepths_.resize(w * h);
@@ -65,7 +65,7 @@ void Level::setTile(glm::ivec3 pos, uint8_t blockId)
     dirty(pos - 1, pos + 1);
 }
 
-void Level::calcLightDepths(int xA, int zA, int xB, int zB)
+void Level::calcLightDepths(const int xA, const int zA, const int xB, const int zB)
 {
     for(int x = xA; x < xB; ++x) {
         for(int z = zA; z < zB; ++z) {
@@ -84,15 +84,15 @@ void Level::dirty(glm::ivec3 min, glm::ivec3 max)
     dirtyRegions_.emplace_back(min, max);
 }
 
-void Level::getCubes(AABB aabb, std::vector<AABB>& cubes, int attribs)
+void Level::getCubes(const AABB aabb, std::vector<AABB>& cubes, const int attribs)
 {
-    for(int x = std::max(0, (int) aabb.a.x - 1); x <= std::min(static_cast<int>(aabb.b.x + 1), size_.x - 1); ++x) {
-        for (int y = std::max(0, (int)aabb.a.y - 1); y <= std::min(static_cast<int>(aabb.b.y + 1), size_.y - 1); ++y) {
-            for (int z = std::max(0, (int)aabb.a.z - 1); z <= std::min((int)aabb.b.z + 1, size_.z - 1); ++z) {
+    for(int x = std::max(0, static_cast<int>(aabb.a.x) - 1); x <= std::min(static_cast<int>(aabb.b.x + 1), size_.x - 1); ++x) {
+        for (int y = std::max(0, static_cast<int>(aabb.a.y) - 1); y <= std::min(static_cast<int>(aabb.b.y + 1), size_.y - 1); ++y) {
+            for (int z = std::max(0, static_cast<int>(aabb.a.z) - 1); z <= std::min(static_cast<int>(aabb.b.z) + 1, size_.z - 1); ++z) {
                 if (blockAttribs({ x, y, z }) & attribs)
                     cubes.emplace_back(
-                        glm::vec3 { (float)x, (float) y, (float) z },
-                        glm::vec3 { (float)x + 1, (float) y + 1, (float) z + 1 });
+                        glm::vec3 { x, y, z },
+                        glm::vec3 { x + 1, y + 1, z + 1 });
             }
         }
     }

@@ -53,12 +53,17 @@ public:
         dirtyRegions_.clear();
     }
 
+    /// Check if a block coordinate is within the level bounds.
+    [[nodiscard]] bool inBounds(const glm::ivec3 pos) const {
+        return pos.x >= 0 && pos.y >= 0 && pos.z >= 0 && pos.x < size_.x && pos.y < size_.y && pos.z < size_.z;
+    }
+
     [[nodiscard]] float getBrightness(const glm::ivec3 vec) const
     {
         constexpr float dark = 0.8F;
         constexpr float light = 1.0F;
 
-        if (vec.x >= 0 && vec.y >= 0 && vec.z >= 0 && vec.x < size_.x && vec.y < size_.y && vec.z < size_.z) {
+        if (inBounds(vec)) {
             return vec.y < lightDepths_[vec.x + vec.z * size_.x] ? dark : light;
         }
 

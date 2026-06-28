@@ -19,7 +19,8 @@ add_executable(ancient_mc src/main.cpp
         src/HitResult.h
         src/BlockInfo.cpp
         src/BlockInfo.h
-        src/read_json.h)
+        src/read_json.h
+)
 
 find_package(glm CONFIG REQUIRED)
 target_link_libraries(ancient_mc PRIVATE glm::glm)

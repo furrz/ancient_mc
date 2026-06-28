@@ -26,7 +26,7 @@ class LevelRenderer
 public:
     explicit LevelRenderer(Level *level, BlockInfo *blockInfo);
     ~LevelRenderer();
-    void rebuildChunk(const glm::ivec3 pos);
+    void rebuildChunk(glm::ivec3 pos);
     void render(const Player *player);
     void renderHit(const HitResult& value);
     void pick(const Player *player);
