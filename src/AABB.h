@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include <glm/glm.hpp>
 
 struct AABB
@@ -45,16 +46,15 @@ struct AABB
         if (!overlapsAxis<secondaryAxisA>(box) ||
             !overlapsAxis<secondaryAxisB>(box)) return change;
 
-        float max;
         if (change > 0.0f && box.b[primaryAxis] <= a[primaryAxis]) {
-            max = a[primaryAxis] - box.b[primaryAxis] - FLT_EPSILON;
+            float max = a[primaryAxis] - box.b[primaryAxis];
             if (max < change) {
                 change = max;
             }
         }
 
         if (change < 0.0F && box.a[primaryAxis] >= b[primaryAxis]) {
-            max = b[primaryAxis] - box.a[primaryAxis] + FLT_EPSILON;
+            float max = b[primaryAxis] - box.a[primaryAxis];
             if (max > change) {
                 change = max;
             }

@@ -17,6 +17,7 @@ class LevelRenderer
     std::vector<bool> chunksDirty_;
     unsigned texture_;
     int chunkDrawLists_;
+    int prevUpdated_{};
 
     void drawTile(glm::ivec3 pos, int layer, int attribMask) const;
 
@@ -31,7 +32,7 @@ public:
 
     [[nodiscard]] int chunkIndex(const glm::ivec3 pos) const
     {
-        return (pos.y * sizeInChunks_.y + pos.z) * sizeInChunks_.x + pos.x;
+        return (pos.y * sizeInChunks_.z + pos.z) * sizeInChunks_.x + pos.x;
     }
 
     [[nodiscard]] int numChunks() const

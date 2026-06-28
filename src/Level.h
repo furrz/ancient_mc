@@ -34,12 +34,12 @@ public:
 
     [[nodiscard]] uint8_t& block(const glm::ivec3 pos)
     {
-        return blocks_[(pos.y * size_.y + pos.z) * size_.x + pos.x];
+        return blocks_[(pos.y * size_.z + pos.z) * size_.x + pos.x];
     }
 
     [[nodiscard]] uint8_t block(const glm::ivec3 pos) const
     {
-        return blocks_[(pos.y * size_.y + pos.z) * size_.x + pos.x];
+        return blocks_[(pos.y * size_.z + pos.z) * size_.x + pos.x];
     }
 
     [[nodiscard]] const std::vector<iv3range>& dirtyRegions() const

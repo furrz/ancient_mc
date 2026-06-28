@@ -23,18 +23,22 @@ void LevelRenderer::rebuildChunk(const glm::ivec3 pos)
     const auto index = chunkIndex(pos);
     chunksDirty_[index] = false;
 
+    const auto start = pos * 16;
+    const auto end = start + 16;
+
     for (const auto layer: { 0, 1 }) {
         for (const auto transparent: { false, true }) {
             const auto attribMask = transparent ? DRAW_TRANSPARENT : DRAW_OPAQUE;
 
             glNewList(chunkDrawLists_ + index * 4 + layer + (transparent ? 0 : 2), GL_COMPILE);
             glEnable(GL_TEXTURE_2D);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             glBindTexture(GL_TEXTURE_2D, texture_);
             glBegin(GL_QUADS);
 
-            for (int x = pos.x * 16; x < pos.x * 16 + 16; x++) {
-                for (int y = pos.y * 16; y < pos.y * 16 + 16; y++) {
-                    for (int z = pos.z * 16; z < pos.z * 16 + 16; z++) {
+            for (int x = start.x; x < end.x; x++) {
+                for (int y = start.y; y < end.y; y++) {
+                    for (int z = start.z; z < end.z; z++) {
                         if (level_->blockAttribs({ x, y, z }) & attribMask) {
                             drawTile({ x, y, z }, layer, attribMask);
                         }
@@ -54,11 +58,11 @@ inline bool checkFace(Level *level, const glm::ivec3 pos, const glm::ivec3 offse
     const auto check = pos + offset;
 
     if (check.x < 0 || check.y < 0 || check.z < 0 || check.x > level->size().x || check.y > level->size().y || check.z > level->size().z)
-        return false;
+        return true;
 
     if (!(level->blockAttribs(check) & attribMask)) {
         br = level->getBrightness(check) * c;
-        return (br == c) != (layer == 1);
+        return (br == c) != (layer == 0);
     }
 
     return false;
@@ -164,20 +168,28 @@ void LevelRenderer::render(const Player *player)
 
     // Todo: Frustum Cull
     for (int x = 0; x < sizeInChunks_.x; x++) {
-        for (int y = 0; y < sizeInChunks_.y; y++) {
-            for (int z = 0; z < sizeInChunks_.z; z++) {
+        for (int z = 0; z < sizeInChunks_.z; z++) {
+            for (int y = 0; y < sizeInChunks_.y; y++) {
                 visibleChunks.emplace_back(x, y, z);
             }
         }
     }
 
     // Rebuild exactly one visible chunk
+    int updatedCount = 0;
     for (const auto pos: visibleChunks) {
         if (chunksDirty_[chunkIndex(pos)]) {
             rebuildChunk(pos);
+            updatedCount++;
             break;
         }
     }
+
+    if (updatedCount == 0 && prevUpdated_ != 0) {
+        std::cout << "Done updating!" << std::endl;
+    }
+
+    prevUpdated_ = updatedCount;
 
     // Pass 1: Brightly Lit Opaque
     glDisable(GL_FOG);
@@ -220,9 +232,9 @@ void LevelRenderer::handleDirtyRegions()
         const auto lowChunk = glm::max(low / CHUNK_SIZE, { 0, 0, 0 });
         const auto highChunk = glm::min(high / CHUNK_SIZE, sizeInChunks_ - glm::ivec3{ 1, 1, 1 });
 
-        for (int x = lowChunk.x; x < highChunk.x; x++) {
-            for (int y = lowChunk.y; y < highChunk.y; y++) {
-                for (int z = lowChunk.z; z < highChunk.z; z++) {
+        for (int x = lowChunk.x; x <= highChunk.x; x++) {
+            for (int y = lowChunk.y; y <= highChunk.y; y++) {
+                for (int z = lowChunk.z; z <= highChunk.z; z++) {
                     chunksDirty_[chunkIndex({ x, y, z })] = true;
                 }
             }

@@ -78,6 +78,7 @@ void Level::save() const
 
 void Level::setTile(glm::ivec3 pos, uint8_t blockId)
 {
+    block(pos) = blockId;
 }
 
 void Level::calcLightDepths(int xA, int zA, int xB, int zB)
@@ -101,5 +102,14 @@ void Level::dirty(glm::ivec3 min, glm::ivec3 max)
 
 void Level::getCubes(AABB aabb, std::vector<AABB>& cubes, int attribs)
 {
-    // TODO: Get Cubes with those attribs!
+    for(int x = std::max(0, (int) aabb.a.x); x <= std::min(static_cast<int>(aabb.b.x + 1), size_.x - 1); ++x) {
+        for (int y = std::max(0, (int)aabb.a.y); y <= std::min(static_cast<int>(aabb.b.y + 1), size_.y - 1); ++y) {
+            for (int z = std::max(0, (int)aabb.a.z); z <= std::min((int)aabb.b.z + 1, size_.z - 1); ++z) {
+                if (blockAttribs({ x, y, z }) & attribs)
+                    cubes.emplace_back(
+                        glm::vec3 { (float)x, (float) y, (float) z },
+                        glm::vec3 { (float)x + 1, (float) y + 1, (float) z + 1 });
+            }
+        }
+    }
 }

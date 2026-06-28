@@ -1,6 +1,8 @@
 #include <array>
+#include <iostream>
 #include <memory>
 #include <optional>
+#include <ostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -14,8 +16,8 @@
 
 constexpr int WIDTH = 1024;
 constexpr int HEIGHT = 768;
-constexpr glm::vec3 fogColor { 0.5, 0.8, 1.0 };
-
+constexpr glm::vec3 clearColor { 0.5, 0.8, 1.0 };
+constexpr glm::vec3 fogColor { 14 / 255.0f, 11 / 255.0f, 10 / 255.0f };
 
 class App
 {
@@ -55,7 +57,7 @@ public:
         /* initialize GL state */
         glEnable(GL_TEXTURE_2D);
         glShadeModel(GL_SMOOTH);
-        glClearColor(fogColor.x, fogColor.y, fogColor.z, 0.0f);
+        glClearColor(clearColor.x, clearColor.y, clearColor.z, 0.0f);
         glClearDepth(1.0f);
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
@@ -76,6 +78,7 @@ public:
     void run()
     {
         double prevTime = glfwGetTime();
+        double passedTimeInTicks = 0.0f;
 
         glfwGetCursorPos(window, &prevCursorPos.x, &prevCursorPos.y);
 
@@ -85,11 +88,13 @@ public:
             // Compute time
             const double newTime = glfwGetTime();
             const double deltaTime = newTime - prevTime;
-            const int ticks = static_cast<int>(deltaTime / (1.0 / 20.0));
+            passedTimeInTicks += deltaTime * 20;
+            const int ticks = static_cast<int>(passedTimeInTicks);
+            passedTimeInTicks -= ticks;
 
             // Tick and Draw
             for (int i = 0; i < ticks; ++i) tick();
-            render(static_cast<float>(deltaTime));
+            render(static_cast<float>(passedTimeInTicks));
 
             if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
                 break;
@@ -113,7 +118,7 @@ public:
         const auto cursorDelta = cursorPos - prevCursorPos;
         prevCursorPos = cursorPos;
 
-        player->turn(cursorDelta);
+        player->turn({ cursorDelta.x, -cursorDelta.y });
 
         const auto hitResult = pick(delta);
 
@@ -175,8 +180,11 @@ public:
     void setupCamera(const float delta)
     {
         glMatrixMode(GL_PROJECTION);
-
-        const glm::mat4 perspective = glm::perspective(glm::radians(70.0f), WIDTH / static_cast<float>(HEIGHT), 0.05f, 1000.0f);
+        const auto aspect = WIDTH / static_cast<float>(HEIGHT);
+        const glm::mat4 perspective = glm::perspective(
+            glm::radians(70.0f),
+            aspect,
+            0.05f, 1000.0f);
         glLoadMatrixf(glm::value_ptr(perspective));
 
         glMatrixMode(GL_MODELVIEW);
@@ -260,6 +268,8 @@ public:
 
 int main()
 {
+    srand(time(nullptr)); // NOLINT(*-msc51-cpp)
+
     App app;
     app.run();
 
