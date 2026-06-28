@@ -46,6 +46,7 @@ public:
 
         window = glfwCreateWindow(WIDTH, HEIGHT, "Game", nullptr, nullptr);
         Input::setWindow(window);
+        glfwSetWindowUserPointer(window, this);
         glfwSetMouseButtonCallback(window, mouseButtonCallback);
         glfwMakeContextCurrent(window);
 
