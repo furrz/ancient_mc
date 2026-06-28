@@ -16,7 +16,7 @@ class LevelRenderer
     Level *level_;
     glm::ivec3 sizeInChunks_;
     std::vector<bool> chunksDirty_;
-    unsigned texture_;
+    unsigned texture_{};
     int chunkDrawLists_;
     BlockInfo *blockInfo_;
     int attrMaxChunkRebuildsPerFrame_ = 4;
