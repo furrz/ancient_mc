@@ -1,7 +1,7 @@
 {
     "level_gen_force": {
         "description": "Force level regeneration even if a save file is found",
-        "value": true
+        "value": false
     },
     "player_phys_speed_running": {
         "description": "Player Running Speed",

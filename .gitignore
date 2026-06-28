@@ -4,3 +4,4 @@ level.dat
 .DS_Store
 *.o
 settings.json
+level.db

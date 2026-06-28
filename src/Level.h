@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <glm/vec3.hpp>
+#include <leveldb/db.h>
 
 #include "AABB.h"
 #include "BlockInfo.h"
@@ -8,8 +9,11 @@
 class ConVars;
 using iv3range = std::pair<glm::ivec3, glm::ivec3>;
 
+namespace leveldb { class DB; }
+
 class Level
 {
+    std::unique_ptr<leveldb::DB> db_{};
     glm::ivec3 size_;
     std::vector<uint8_t> blocks_;
     std::vector<int> lightDepths_;

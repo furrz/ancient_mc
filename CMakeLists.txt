@@ -44,8 +44,8 @@ target_include_directories(ancient_mc PRIVATE ${Stb_INCLUDE_DIR})
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(ancient_mc PRIVATE nlohmann_json::nlohmann_json)
 
-find_package(ZLIB REQUIRED)
-target_link_libraries(ancient_mc PRIVATE ZLIB::ZLIB)
-
 find_package(unofficial-noise CONFIG REQUIRED)
 target_link_libraries(ancient_mc PRIVATE unofficial::noise::noise-static)
+
+find_package(leveldb CONFIG REQUIRED)
+target_link_libraries(ancient_mc PRIVATE leveldb::leveldb)

@@ -1,9 +1,9 @@
 #include "Level.h"
 
 #include <noise/noise.h>
+#include <leveldb/db.h>
 
 #include "ConVars.h"
-#include "GZip.h"
 #include "read_json.h"
 
 Level::Level(ConVars *conVars, const int w, const int h, const int d, BlockInfo *blockInfo) : size_(w, d, h), blockInfo_(blockInfo)
@@ -14,6 +14,13 @@ Level::Level(ConVars *conVars, const int w, const int h, const int d, BlockInfo 
 }
 
 void Level::init() {
+    leveldb::DB *db_tmp;
+    leveldb::Options options;
+    options.create_if_missing = true;
+    leveldb::Status status = leveldb::DB::Open(options, "level.db", &db_tmp);
+
+    db_ = std::unique_ptr<leveldb::DB>(db_tmp);
+
     if (attrForceRegen_ || !load()) generate();
 
     if (attrForceRegen_) {
@@ -23,9 +30,13 @@ void Level::init() {
 
 bool Level::load()
 {
-    if (!GZip::readFixedSize("level.dat", blocks_.data(), blocks_.size())) {
+    leveldb::ReadOptions readOptions;
+    readOptions.fill_cache = false;
+    std::string level_data;
+    if (!db_->Get(readOptions, "whole_world", &level_data).ok())
         return false;
-    }
+
+    memcpy(blocks_.data(), level_data.data(), blocks_.size() * sizeof(blocks_[0]));
 
     dirty({ 0, 0, 0 }, size_);
 
@@ -87,7 +98,8 @@ void Level::generate()
 
 void Level::save() const
 {
-    GZip::writeFixedSize("level.dat", blocks_.data(), blocks_.size());
+    db_->Put(leveldb::WriteOptions(), "whole_world",
+        leveldb::Slice(reinterpret_cast<const char*>(blocks_.data()), blocks_.size()));
 }
 
 void Level::setTile(const glm::ivec3 pos, const uint8_t blockId)
