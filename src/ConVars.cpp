@@ -45,7 +45,7 @@ void ConVars::save()
             break;
         }
 
-        output[name] = nlohmann::json::object({
+        output[name] = nlohmann::ordered_json::object({
             { "description", entry.description },
             { "value", value }
         });
