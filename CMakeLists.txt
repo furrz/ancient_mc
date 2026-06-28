@@ -43,7 +43,15 @@ find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(ancient_mc PRIVATE nlohmann_json::nlohmann_json)
 
 find_package(unofficial-noise CONFIG REQUIRED)
-target_link_libraries(ancient_mc PRIVATE unofficial::noise::noise-static)
+
+# On mac, we only have noise-static, but on windows, we only have noise!?
+if(TARGET unofficial::noise::noise-static)
+    target_link_libraries(ancient_mc PRIVATE unofficial::noise::noise-static)
+else()
+    target_link_libraries(ancient_mc PRIVATE unofficial::noise::noise)
+endif()
+
+
 
 find_package(leveldb CONFIG REQUIRED)
 target_link_libraries(ancient_mc PRIVATE leveldb::leveldb)
