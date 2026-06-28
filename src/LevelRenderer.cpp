@@ -166,17 +166,17 @@ void LevelRenderer::render(const Player *player)
     for (int x = 0; x < sizeInChunks_.x; x++) {
         for (int y = 0; y < sizeInChunks_.y; y++) {
             for (int z = 0; z < sizeInChunks_.z; z++) {
-                visibleChunks.emplace_back(glm::ivec3{ x, y, z });
+                visibleChunks.emplace_back(x, y, z);
             }
         }
     }
 
     // Rebuild exactly one visible chunk
     for (const auto pos: visibleChunks) {
-        const auto index = chunkIndex(pos);
-        if (!chunksDirty_[index]) break;
-
-        rebuildChunk(pos);
+        if (chunksDirty_[chunkIndex(pos)]) {
+            rebuildChunk(pos);
+            break;
+        }
     }
 
     // Pass 1: Brightly Lit Opaque
