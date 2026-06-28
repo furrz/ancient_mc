@@ -2,12 +2,12 @@
 
 #include "read_json.h"
 
-void ConVars::load()
+void ConVars::loadFile(const char *path)
 {
-    const auto data = read_json("res/config.json");
+    const auto data = read_json(path);
 
     for (const auto& [key, value] : data.items()) {
-        const auto entry = entries_.find(key.c_str());
+        const auto entry = entries_.find(key);
         if (entry == entries_.end()) {
             std::cerr << "res/config.json has invalid convar: " << key << std::endl;
             continue;
@@ -24,34 +24,47 @@ void ConVars::load()
             *static_cast<bool *>(entry->second.storage) = value["value"];
             break;
         }
-
     }
 }
 
-void ConVars::save()
+void ConVars::saveFile(const char *path, const std::vector<std::string>& keys)
 {
-    nlohmann::ordered_json output{};
-    for (const auto& [name, entry] : entries_) {
+    auto output = nlohmann::ordered_json::object();
+    for (const auto& name : keys) {
+        const auto [description, storage, type] = entries_.at(name);
+
         nlohmann::json value = nullptr;
-        switch (entry.type) {
+        switch (type) {
         case cv_internal::CVType::Float:
-            value = *static_cast<float*>(entry.storage);
+            value = *static_cast<float*>(storage);
             break;
         case cv_internal::CVType::Int:
-            value = *static_cast<int*>(entry.storage);
+            value = *static_cast<int*>(storage);
             break;
         case cv_internal::CVType::Bool:
-            value = *static_cast<bool*>(entry.storage);
+            value = *static_cast<bool*>(storage);
             break;
         }
 
         output[name] = nlohmann::ordered_json::object({
-            { "description", entry.description },
+            { "description", description },
             { "value", value }
         });
     }
 
-    std::ofstream out("res/config.json");
+    std::ofstream out(path);
     out << std::setw(4) << output << std::endl;
     out.close();
+}
+
+void ConVars::load()
+{
+    loadFile("res/config.json");
+    loadFile("settings.json");
+}
+
+void ConVars::save()
+{
+    saveFile("res/config.json", gameConfigKeys_);
+    saveFile("settings.json", userPrefsKeys_);
 }

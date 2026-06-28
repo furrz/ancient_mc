@@ -1,7 +1,19 @@
 {
-    "drag_grounded_horizontal": {
-        "description": "Player Additional Horizontal Drag while Grounded",
-        "value": 0.800000011920929
+    "speed_running": {
+        "description": "Player Running Speed",
+        "value": 0.03500000014901161
+    },
+    "speed_walking": {
+        "description": "Player Walking Speed",
+        "value": 0.019999999552965164
+    },
+    "speed_in_air": {
+        "description": "Player Speed In Air",
+        "value": 0.004999999888241291
+    },
+    "flying_speed": {
+        "description": "Player Flying Speed",
+        "value": 0.10000000149011612
     },
     "drag_horizontal": {
         "description": "Player Horizontal Drag Coefficient",
@@ -11,9 +23,13 @@
         "description": "Player Vertical Drag Coefficient",
         "value": 0.9800000190734863
     },
-    "flying_speed": {
-        "description": "Player Flying Speed",
-        "value": 0.10000000149011612
+    "drag_grounded_horizontal": {
+        "description": "Player Additional Horizontal Drag while Grounded",
+        "value": 0.800000011920929
+    },
+    "jump_velocity": {
+        "description": "Player Jump Velocity",
+        "value": 0.11999999731779099
     },
     "gravity": {
         "description": "Player Gravity",
@@ -23,48 +39,28 @@
         "description": "Player Gravity in Water",
         "value": 0.4000000059604645
     },
-    "jump_velocity": {
-        "description": "Player Jump Velocity",
-        "value": 0.11999999731779099
-    },
-    "max_chunk_rebuilds_per_frame": {
-        "description": "Maximum number of chunks that can be rebuilt (mesh generated) per render frame",
-        "value": 8
-    },
-    "max_pitch_angle": {
-        "description": "Maximum Upward/Downward Look Angle",
-        "value": 90.0
-    },
-    "mouse_look_speed": {
-        "description": "Mouse Look Sensitivity",
-        "value": 0.15000000596046448
-    },
-    "player_half_height": {
-        "description": "Player Hitbox Half-Height",
-        "value": 0.8999999761581421
-    },
-    "player_radius": {
-        "description": "Player Hitbox Half-Width",
-        "value": 0.30000001192092896
-    },
-    "speed_in_air": {
-        "description": "Player Speed In Air",
-        "value": 0.004999999888241291
-    },
-    "speed_running": {
-        "description": "Player Running Speed",
-        "value": 0.03500000014901161
-    },
-    "speed_walking": {
-        "description": "Player Walking Speed",
-        "value": 0.019999999552965164
+    "swim_upward_max_velocity": {
+        "description": "Player Maximum Velocity while Swimming Upward",
+        "value": 0.07000000029802322
     },
     "swim_upward_acceleration": {
         "description": "Player Acceleration while Swimming Upward",
         "value": 0.009999999776482582
     },
-    "swim_upward_max_velocity": {
-        "description": "Player Maximum Velocity while Swimming Upward",
-        "value": 0.07000000029802322
+    "max_pitch_angle": {
+        "description": "Maximum Upward/Downward Look Angle",
+        "value": 90.0
+    },
+    "player_radius": {
+        "description": "Player Hitbox Half-Width",
+        "value": 0.30000001192092896
+    },
+    "player_half_height": {
+        "description": "Player Hitbox Half-Height",
+        "value": 0.8999999761581421
+    },
+    "max_chunk_rebuilds_per_frame": {
+        "description": "Maximum number of chunks that can be rebuilt (mesh generated) per render frame",
+        "value": 4
     }
 }

@@ -26,10 +26,11 @@ Player::Player(ConVars *conVars, Level *level)
     conVars->setupVar("gravity_in_water", "Player Gravity in Water", &attrGravityInWater_);
     conVars->setupVar("swim_upward_max_velocity", "Player Maximum Velocity while Swimming Upward", &attrSwimUpwardMaxVelocity_);
     conVars->setupVar("swim_upward_acceleration", "Player Acceleration while Swimming Upward", &attrSwimUpwardAcceleration_);
-    conVars->setupVar("mouse_look_speed", "Mouse Look Sensitivity", &attrMouseLookSpeed_);
     conVars->setupVar("max_pitch_angle", "Maximum Upward/Downward Look Angle", &attrMaxPitchAngle_);
     conVars->setupVar("player_radius", "Player Hitbox Half-Width", &attrPlayerRadius_);
     conVars->setupVar("player_half_height", "Player Hitbox Half-Height", &attrPlayerHalfHeight_);
+    conVars->setupVar("mouse_look_speed", "Mouse Look Sensitivity", &attrMouseLookSpeed_, ConVars::SaveType::UserPrefs);
+    conVars->setupVar("flying", "Player is Flying", &flying_, ConVars::SaveType::None);
 
     level_ = level;
     resetPos();

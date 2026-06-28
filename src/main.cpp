@@ -285,6 +285,7 @@ public:
     ~App()
     {
         level->save();
+        conVars_->save();
         glfwTerminate();
     }
 };
