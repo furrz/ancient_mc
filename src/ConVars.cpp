@@ -30,7 +30,7 @@ void ConVars::load()
 
 void ConVars::save()
 {
-    nlohmann::json output{};
+    nlohmann::ordered_json output{};
     for (const auto& [name, entry] : entries_) {
         nlohmann::json value = nullptr;
         switch (entry.type) {
@@ -45,7 +45,7 @@ void ConVars::save()
             break;
         }
 
-        output[name] = nlohmann::json::object({
+        output[name] = nlohmann::ordered_json::object({
             { "description", entry.description },
             { "value", value }
         });
