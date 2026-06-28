@@ -3,6 +3,8 @@
 #include <fstream>
 #include <iostream>
 
+#include "GZip.h"
+
 Level::Level(const int w, const int h, const int d, BlockInfo *blockInfo) : size_(w, d, h), blockInfo_(blockInfo)
 {
     blocks_.resize(w * h * d);
@@ -13,20 +15,9 @@ Level::Level(const int w, const int h, const int d, BlockInfo *blockInfo) : size
 
 bool Level::load()
 {
-    std::ifstream in("level.dat", std::ios::binary | std::ios::ate);
-
-    if (!in.is_open() || in.tellg() != blocks_.size()) {
-        std::cerr << "Could not load level.dat" << std::endl;
+    if (!GZip::readFixedSize("level.dat", blocks_.data(), blocks_.size())) {
         return false;
     }
-
-    in.seekg(0, std::ios::beg);
-
-    in.read(
-        reinterpret_cast<std::istream::char_type *>(blocks_.data()),
-        blocks_.size());
-
-    in.close();
 
     dirty({ 0, 0, 0 }, size_);
 
@@ -50,11 +41,7 @@ void Level::generate()
 
 void Level::save() const
 {
-    std::ofstream out("level.dat", std::ios::binary);
-    out.write(
-        reinterpret_cast<const std::ostream::char_type *>(blocks_.data()),
-        blocks_.size());
-    out.close();
+    GZip::writeFixedSize("level.dat", blocks_.data(), blocks_.size());
 }
 
 void Level::setTile(const glm::ivec3 pos, const uint8_t blockId)

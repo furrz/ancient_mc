@@ -22,6 +22,8 @@ add_executable(ancient_mc src/main.cpp
         src/rng.h
         src/ConVars.cpp
         src/ConVars.h
+        src/GZip.cpp
+        src/GZip.h
 )
 
 find_package(glm CONFIG REQUIRED)
@@ -38,3 +40,6 @@ target_include_directories(ancient_mc PRIVATE ${Stb_INCLUDE_DIR})
 
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(ancient_mc PRIVATE nlohmann_json::nlohmann_json)
+
+find_package(ZLIB REQUIRED)
+target_link_libraries(ancient_mc PRIVATE ZLIB::ZLIB)
