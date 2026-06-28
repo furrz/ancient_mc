@@ -1,0 +1,7 @@
+glfw
+glm
+glad
+stb
+nlohmann_json
+zlib
+libnoise
