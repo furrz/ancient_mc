@@ -87,6 +87,9 @@ public:
 
         level->init();
 
+        if (level->justGenerated())
+            processes->runWorldGenProcesses(level.get());
+
     }
 
     void run()

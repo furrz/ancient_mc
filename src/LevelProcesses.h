@@ -21,19 +21,21 @@ class LevelProcesses {
         std::optional<uint8_t> block_above;
         bool invert_above;
         std::optional<uint8_t> block_beside;
+        int block_beside_min, block_beside_max;
         uint8_t replacement_block;
     };
 
     std::vector<RandomProcessTiming> randomProcessTiming_;
     std::vector<Process> randomProcesses_;
     std::vector<Process> tickedProcesses_;
+    std::vector<Process> worldGenProcesses_;
     int tickCounter_{};
 
-    void executeProcess(const Process& process, glm::ivec3 pos, Level *level, const Player *player);
+    void executeProcess(const Process& process, glm::ivec3 pos, Level *level);
 
 public:
     LevelProcesses(ConVars *conVars, const BlockInfo *blockInfo);
-
+    void runWorldGenProcesses(Level *level);
     void tick(Level *level, const Player *player);
 
 };

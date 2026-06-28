@@ -73,6 +73,7 @@ void Level::generate()
     }
 
     dirty({ 0, 0, 0 }, size_);
+    justGenerated_ = true;
 }
 
 void Level::save() const

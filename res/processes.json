@@ -2,7 +2,7 @@
   "processes": [
     {
       "name": "grass_spread",
-      "type": "random",
+      "types": ["random"],
       "interval": 2,
       "offset": 0,
       "repeat": 10,
@@ -13,7 +13,7 @@
     },
     {
       "name": "grass_die",
-      "type": "ticked",
+      "types": ["ticked", "world_gen"],
       "block": "grass",
       "above": "air",
       "invert_above": true,
@@ -21,9 +21,17 @@
     },
     {
       "name": "water_flow_down",
-      "type": "ticked",
+      "types": ["ticked"],
       "block": "air",
       "above": "water",
+      "set_block": "water"
+    },
+    {
+      "name": "water_merge",
+      "types": ["ticked"],
+      "block": "air",
+      "beside": "water",
+      "beside_min": 2,
       "set_block": "water"
     }
   ]

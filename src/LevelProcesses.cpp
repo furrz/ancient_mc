@@ -18,7 +18,8 @@ LevelProcesses::LevelProcesses(ConVars *conVars, const BlockInfo *blockInfo) {
     };
 
     for (const auto &process: data["processes"]) {
-        const auto type = process.value<std::string>("type", "random");
+        const auto types = process.value<nlohmann::json>("types",
+            nlohmann::json::array({ "random" }));
 
         const auto proc = Process{
             process.value<std::string>("name", "unnamed"),
@@ -26,31 +27,47 @@ LevelProcesses::LevelProcesses(ConVars *conVars, const BlockInfo *blockInfo) {
             process.value<std::optional<std::string> >("above", std::nullopt).and_then(getOptional),
             process.value<bool>("invert_above", false),
             process.value<std::optional<std::string> >("beside", std::nullopt).and_then(getOptional),
+            process.value<int>("beside_min", 1),
+            process.value<int>("beside_max", 5),
             blockInfo->byID(process.value<std::string>("set_block", "air"))
         };
 
-        if (type == "random") {
-            randomProcessTiming_.emplace_back(
-                process.value<int>("interval", 1),
-                process.value<int>("offset", 0),
-                process.value<int>("repeat", 1)
-            );
-            randomProcesses_.emplace_back(proc);
-        } else if (type == "ticked") {
-            tickedProcesses_.emplace_back(proc);
-        } else {
-            std::cerr << "Unrecognized process type: " << type << std::endl;
+        for (const auto& type_name : types) {
+            if (type_name == "random") {
+                randomProcessTiming_.emplace_back(
+                    process.value<int>("interval", 1),
+                    process.value<int>("offset", 0),
+                    process.value<int>("repeat", 1)
+                );
+                randomProcesses_.emplace_back(proc);
+            } else if (type_name == "ticked") {
+                tickedProcesses_.emplace_back(proc);
+            } else if (type_name == "world_gen") {
+                worldGenProcesses_.emplace_back(proc);
+            } else {
+                std::cerr << "Unrecognized process type: " << type_name << std::endl;
+            }
         }
     }
 }
 
-bool isBeside(Level *level, glm::ivec3 pos, uint8_t block) {
+void LevelProcesses::runWorldGenProcesses(Level *level) {
+    const auto size = level->size();
+    for (const auto& proc : worldGenProcesses_)
+        for (int x = 0; x < size.x; x++)
+            for (int z = 0; z < size.z; z++)
+                for (int y = 0; y < size.y; y++)
+                    executeProcess(proc, { x, y, z }, level);
+}
+
+int horizontalNeighborCount(Level *level, glm::ivec3 pos, uint8_t block) {
+    int count = 0;
     for (const auto side: {glm::ivec3(1, 0, 0), glm::ivec3(-1, 0, 0), glm::ivec3(0, 0, 1), glm::ivec3(0, 0, -1)}) {
         const auto p = pos + side;
-        if (level->inBounds(p) && level->block(p) == block) return true;
+        if (level->inBounds(p) && level->block(p) == block) count++;
     }
 
-    return false;
+    return count;
 }
 
 
@@ -67,22 +84,21 @@ void LevelProcesses::tick(Level *level, const Player *player) {
                                                    (RNG::randomFloat() * 40.0f) - 20.0f,
                                                    (RNG::randomFloat() * 80.0f) - 40.0f
                                                });
-            executeProcess(process, random_pos, level, player);
+            executeProcess(process, random_pos, level);
         }
     }
 
     for (const auto& process : tickedProcesses_) {
         for (const auto pos : level->tickedBlocks()) {
-            executeProcess(process, pos, level, player);
+            executeProcess(process, pos, level);
         }
     }
 
     tickCounter_++;
 }
 
-void LevelProcesses::executeProcess(const Process &process, glm::ivec3 pos, Level *level, const Player *player) {
+void LevelProcesses::executeProcess(const Process &process, glm::ivec3 pos, Level *level) {
     if (!level->inBounds(pos)) return;
-
 
     const auto block = level->block(pos);
     if (block != process.match_block) return;
@@ -93,10 +109,12 @@ void LevelProcesses::executeProcess(const Process &process, glm::ivec3 pos, Leve
                                     invert_above)))
         return;
 
-    if (process.block_beside && !isBeside(level, pos, process.block_beside.value()))
-        return;
 
-    std::cout << "Process happened: " << process.name << std::endl;
+    if (process.block_beside) {
+        const auto count = horizontalNeighborCount(level, pos, process.block_beside.value());
+        if (count < process.block_beside_min || count > process.block_beside_max)
+            return;
+    }
 
     level->setTile(pos, process.replacement_block);
 }

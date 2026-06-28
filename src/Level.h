@@ -18,6 +18,7 @@ class Level
     BlockInfo *blockInfo_;
     int currentTickedBlocks_ = 0;
     bool attrForceRegen_ = false;
+    bool justGenerated_ = false;
 
 public:
     Level(ConVars *conVars, int w, int h, int d, BlockInfo *blockInfo);
@@ -30,6 +31,7 @@ public:
     void dirty(glm::ivec3 min, glm::ivec3 max);
     void getCubes(AABB aabb, std::vector<AABB>& cubes, int attribs);
     void tickTile(glm::ivec3 pos) { if (inBounds(pos)) tickedBlocks_[currentTickedBlocks_].emplace_back(pos); }
+    [[nodiscard]] bool justGenerated() const { return justGenerated_; }
 
     [[nodiscard]] int blockAttribs(const glm::ivec3 pos)
     {
