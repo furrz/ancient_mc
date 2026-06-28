@@ -249,14 +249,14 @@ void LevelRenderer::render(const glm::ivec3 center) {
     }
 
     // Pass 1: Opaque
-    glDisable(GL_FOG);
+    glEnable(GL_FOG);
     for (const auto pos: visibleChunks) {
         glCallList(chunkDrawLists_ + chunkIndex(pos) * NUM_CHUNK_PASSES);
     }
 
-    glEnable(GL_BLEND);
 
-    // Pass 4: Transparent
+    // Pass 2: Transparent
+    glEnable(GL_BLEND);
     for (const auto pos: visibleChunks) {
         glCallList(chunkDrawLists_ + chunkIndex(pos) * NUM_CHUNK_PASSES + 1);
     }

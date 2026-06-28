@@ -19,7 +19,6 @@ constexpr int WIDTH = 1024;
 constexpr int HEIGHT = 768;
 constexpr float ASPECT = WIDTH / static_cast<float>(HEIGHT);
 constexpr glm::vec3 clearColor{ 0.5, 0.8, 1.0 };
-constexpr glm::vec3 fogColor{ 14 / 255.0f, 11 / 255.0f, 10 / 255.0f };
 
 class App
 {
@@ -201,9 +200,11 @@ public:
 
         glEnable(GL_CULL_FACE);
         glEnable(GL_FOG);
-        glFogi(GL_FOG_MODE, GL_EXP);
-        glFogf(GL_FOG_DENSITY, 0.2f);
-        glFogfv(GL_FOG_COLOR, glm::value_ptr(fogColor));
+        glFogi(GL_FOG_MODE, GL_LINEAR);
+        glFogf(GL_FOG_START, 40.0f);
+        glFogf(GL_FOG_END, 80.0f);
+        glFogf(GL_FOG_DENSITY, 0.5f);
+        glFogfv(GL_FOG_COLOR, glm::value_ptr(clearColor));
         glDisable(GL_BLEND);
 
         // Draw all render layers
@@ -226,7 +227,7 @@ public:
         glMatrixMode(GL_PROJECTION);
         const glm::mat4 perspective = glm::perspective(
             glm::radians(70.0f),
-            ASPECT, 0.05f, 1000.0f);
+            ASPECT, 0.05f, 128.0f);
         glLoadMatrixf(glm::value_ptr(perspective));
 
         glMatrixMode(GL_MODELVIEW);
@@ -252,7 +253,7 @@ public:
 
         const auto perspective = glm::perspective(
             glm::radians(70.0f),
-            ASPECT, 0.05f, 1000.0f);
+            ASPECT, 0.05f, 128.0f);
 
         glLoadMatrixf(glm::value_ptr(pick * perspective));
 
