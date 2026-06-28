@@ -18,7 +18,6 @@ class LevelRenderer
     std::vector<bool> chunksDirty_;
     unsigned texture_;
     int chunkDrawLists_;
-    int prevUpdated_{};
     BlockInfo *blockInfo_;
 
     void drawTile(glm::ivec3 pos, int layer, int attribMask) const;
