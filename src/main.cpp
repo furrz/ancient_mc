@@ -229,7 +229,7 @@ public:
     }
 
     // pick a block
-    std::optional<HitResult> pick(const float delta) const
+    [[nodiscard]] std::optional<HitResult> pick(const float delta) const
     {
         std::array<unsigned, 2000> selectBuffer{};
         glSelectBuffer(selectBuffer.size(), selectBuffer.data());
@@ -247,7 +247,7 @@ public:
         int cursor = 0;
         for (int i = 0; i < hits; i++) {
             const int nameCount = static_cast<int>(selectBuffer[cursor++]);
-            const long minZ = selectBuffer[cursor++];
+            const long minZ = static_cast<long>(selectBuffer[cursor++]);
             cursor++;
 
             const long dist = minZ;

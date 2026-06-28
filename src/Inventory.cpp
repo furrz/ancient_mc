@@ -48,14 +48,14 @@ void Inventory::render()
     constexpr float ICONS_MARGIN = 10.0f;
 
     for (int i = 0; i < slots_.size(); i++) {
-        const float x = i * ICON_SIZE + i * ICON_SPACING + ICONS_MARGIN;
+        const float x = static_cast<float>(i * ICON_SIZE + i * ICON_SPACING) + ICONS_MARGIN;
         const float color = (slot_ == i) ? 1.0f : 0.8f;
 
         const auto tex = blockInfo_->textureIndex(slots_[i], 2);
 
         const float u0 = static_cast<float>(tex) / 16.0f;
         const float u1 = u0 + 0.0624375F;
-        const float v0 = static_cast<float>(tex / 16) / 16.0f;
+        const float v0 = static_cast<float>(tex / 16) / 16.0f; // NOLINT(*-integer-division)
         const float v1 = v0 + 0.0624375F;
 
         glColor4f(color, color, color, color);
