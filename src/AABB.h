@@ -50,7 +50,7 @@ struct AABB
             change = std::min(change, a[primaryAxis] - box.b[primaryAxis]);
         }
 
-        if (change < 0.0F && box.a[primaryAxis] >= b[primaryAxis]) {
+        if (change < 0.0f && box.a[primaryAxis] >= b[primaryAxis]) {
             change = std::max(change, b[primaryAxis] - box.a[primaryAxis]);
         }
 
