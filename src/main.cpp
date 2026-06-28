@@ -207,7 +207,7 @@ public:
         glDisable(GL_BLEND);
 
         // Draw all render layers
-        levelRenderer->render(player.get());
+        levelRenderer->render(player->pos());
 
 
         //Draw hit result
@@ -269,7 +269,7 @@ public:
         glRenderMode(GL_SELECT);
 
         setupPickCamera(delta);
-        levelRenderer->pick(player.get());
+        levelRenderer->pick(player->box());
 
         const int hits = glRenderMode(GL_RENDER);
 

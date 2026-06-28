@@ -2,9 +2,10 @@
 
 #include <vector>
 
+#include "AABB.h"
 #include "BlockInfo.h"
+#include "ConVars.h"
 #include "HitResult.h"
-#include "Player.h"
 
 class Level;
 
@@ -28,9 +29,9 @@ public:
     explicit LevelRenderer(ConVars *conVars, Level *level, BlockInfo *blockInfo);
     ~LevelRenderer();
     void rebuildChunk(glm::ivec3 pos);
-    void render(const Player *player);
+    void render(glm::ivec3 center);
     void renderHit(const HitResult& value);
-    void pick(const Player *player) const;
+    void pick(const AABB& box) const;
     void handleDirtyRegions();
 
     [[nodiscard]] int chunkIndex(const glm::ivec3 pos) const

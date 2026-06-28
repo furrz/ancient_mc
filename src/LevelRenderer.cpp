@@ -20,6 +20,7 @@ LevelRenderer::LevelRenderer(ConVars *conVars, Level *level, BlockInfo *blockInf
     const int chunkCount = numChunks();
     chunksDirty_.resize(chunkCount);
     chunkDrawLists_ = glGenLists(4 * chunkCount);
+    chunksDirty_.assign(chunkCount, true);
 
     // Load terrain image
     int w, h, nChannels;
@@ -218,19 +219,21 @@ void LevelRenderer::drawTile(const glm::ivec3 pos, int layer, int attribMask) co
 }
 
 
-void LevelRenderer::render(const Player *player) {
+void LevelRenderer::render(const glm::ivec3 center) {
     static std::vector<glm::ivec3> visibleChunks;
     visibleChunks.clear();
 
-    glm::ivec3 myChunk = glm::ivec3(player->pos()) / CHUNK_SIZE;
+    const glm::ivec3 myChunk = center / CHUNK_SIZE;
 
-    // Todo: Frustum Cull
-    for (int x = 0; x < sizeInChunks_.x; x++) {
-        for (int z = 0; z < sizeInChunks_.z; z++) {
-            for (int y = 0; y < sizeInChunks_.y; y++) {
+    // Accumulate list of chunk positions that should be visible
+    for (int x = myChunk.x - attrRenderDistance_; x <= attrRenderDistance_ + myChunk.x; x++) {
+        for (int z = myChunk.z -attrRenderDistance_; z <= attrRenderDistance_ + myChunk.z; z++) {
+            for (int y = std::max(-attrRenderDistance_ + myChunk.y, 0); y <= std::min(attrRenderDistance_ + myChunk.y, sizeInChunks_.y - 1); y++) {
+                // temp until chunk loading is added
+                if (x < 0 || x >= sizeInChunks_.x || z < 0 || z >= sizeInChunks_.z || y < 0 || y >= sizeInChunks_.y) continue;
+
                 const auto diff = glm::abs(myChunk - glm::ivec3 { x, y, z });
                 const auto dist = diff.x + diff.y + diff.z;
-
                 if (dist <= attrRenderDistance_)
                     visibleChunks.emplace_back(x, y, z);
             }
@@ -335,10 +338,10 @@ void LevelRenderer::renderHit(const HitResult &value) {
     glDisable(GL_BLEND);
 }
 
-void LevelRenderer::pick(const Player *player) const
+void LevelRenderer::pick(const AABB& box) const
 {
     float r = 3.0F;
-    const auto [a, b] = player->box().grown({r, r, r});
+    const auto [a, b] = box.grown({r, r, r});
 
     glInitNames();
 
