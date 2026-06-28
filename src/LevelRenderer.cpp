@@ -58,7 +58,7 @@ inline bool checkFace(Level *level, const glm::ivec3 pos, const glm::ivec3 offse
 
     if (!(level->blockAttribs(check) & attribMask)) {
         br = level->getBrightness(check) * c;
-        return br == c ^ layer == 1;
+        return (br == c) != (layer == 1);
     }
 
     return false;
