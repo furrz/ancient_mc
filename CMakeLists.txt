@@ -48,4 +48,4 @@ find_package(ZLIB REQUIRED)
 target_link_libraries(ancient_mc PRIVATE ZLIB::ZLIB)
 
 find_package(unofficial-noise CONFIG REQUIRED)
-target_link_libraries(ancient_mc PRIVATE unofficial::noise::noise)
+target_link_libraries(ancient_mc PRIVATE unofficial::noise::noise-static)
