@@ -76,8 +76,6 @@ void Player::move()
     level_->getCubes(box_.expanded(vel), cubes, COLLIDABLE);
     level_->getCubes(box_.expanded(vel), buoyantCubes, BUOYANT);
 
-    std::cout << cubes.size() << std::endl;
-
     // Handle collision with blocks
     for(const auto& bb : cubes) {
         const auto prev = vel.y;
