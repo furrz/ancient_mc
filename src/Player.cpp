@@ -1,10 +1,8 @@
 #include "Player.h"
 
-#include "rng.h"
+#include <glm/ext/scalar_constants.hpp>
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
+#include "rng.h"
 
 #include <algorithm>
 #include <iostream>
@@ -22,6 +20,14 @@ constexpr float DRAG_VERTICAL = 0.98F;
 constexpr float DRAG_GROUNDED_HORIZONTAL = 0.8F;
 constexpr float GRAVITY = 0.005;
 constexpr float JUMP_VELOCITY = 0.12F;
+constexpr float FLYING_SPEED = 0.1f;
+constexpr float SWIM_UPWARD_MAX_VELOCITY = 0.07f;
+constexpr float SWIM_UPWARD_ACCELERATION = 0.01f;
+constexpr float LOOK_SPEED = 0.15;
+constexpr float MAX_PITCH_ANGLE = 90.0f;
+constexpr float PLAYER_RADIUS = 0.3f;
+constexpr float PLAYER_HALF_HEIGHT = 0.9f;
+constexpr float GRAVITY_IN_WATER = 0.4f;
 
 Player::Player(Level *level)
 {
@@ -41,9 +47,7 @@ void Player::setPos(const glm::vec3 pos)
 {
     pos_ = pos;
     posOld_ = pos;
-    constexpr float W = 0.3f;
-    constexpr float H = 0.9f;
-    constexpr glm::vec3 SIZE { W, H, W };
+    constexpr glm::vec3 SIZE { PLAYER_RADIUS, PLAYER_HALF_HEIGHT, PLAYER_RADIUS };
 
     box_ = AABB { pos - SIZE, pos + SIZE };
 }
@@ -54,8 +58,8 @@ void Player::moveRelative(glm::vec2 movement, const float speed)
 
     movement = glm::normalize(movement) * speed;
 
-    const float sin = sinf(rot_.y * static_cast<float>(M_PI) / 180.0f);
-    const float cos = cosf(rot_.y * static_cast<float>(M_PI) / 180.0f);
+    const float sin = sinf(rot_.y * glm::pi<float>() / 180.0f);
+    const float cos = cosf(rot_.y * glm::pi<float>() / 180.0f);
     vel_.x += movement.x * cos - movement.y * sin;
     vel_.z += movement.y * cos + movement.x * sin;
 }
@@ -135,16 +139,20 @@ void Player::tick()
     wasFPressed_ = fPressed;
 
     if (flying_)
-        vel_.y = jumpPressed ? 0.1f : Input::getKey(GLFW_KEY_LEFT_CONTROL) ? -0.1f : 0;
+        vel_.y = jumpPressed ? FLYING_SPEED : Input::getKey(GLFW_KEY_LEFT_CONTROL) ? -FLYING_SPEED : 0;
     else if (jumpPressed && onGround_ && !inWater_)
         vel_.y += JUMP_VELOCITY;
     else if (jumpPressed && inWater_) {
-        if (vel_.y < 0.07f) vel_.y += 0.01f;
+        if (vel_.y < SWIM_UPWARD_MAX_VELOCITY) {
+            vel_.y += SWIM_UPWARD_ACCELERATION;
+        }
     }
 
     moveRelative(movement, (onGround_ || flying_) ? (running ? SPEED_RUNNING : SPEED_WALKING) : SPEED_IN_AIR);
 
-    if (!flying_) vel_.y = vel_.y - GRAVITY * (inWater_ ? 0.4f : 1.0f);
+    if (!flying_) {
+        vel_.y = vel_.y - GRAVITY * (inWater_ ? GRAVITY_IN_WATER : 1.0f);
+    }
 
     move();
     vel_.x *= DRAG_HORIZONTAL;
@@ -160,9 +168,9 @@ void Player::tick()
 
 void Player::turn(const glm::vec2 vec)
 {
-    rot_.y = static_cast<float>(static_cast<double>(rot_.y) + static_cast<double>(vec.x) * 0.15);
-    rot_.x = static_cast<float>(static_cast<double>(rot_.x) - static_cast<double>(vec.y) * 0.15);
+    rot_.y = rot_.y + vec.x * LOOK_SPEED;
+    rot_.x = rot_.x - vec.y * LOOK_SPEED;
 
-    rot_.x = std::max(rot_.x, -90.0f);
-    rot_.x = std::min(rot_.x, 90.0f);
+    rot_.x = std::max(rot_.x, -MAX_PITCH_ANGLE);
+    rot_.x = std::min(rot_.x, MAX_PITCH_ANGLE);
 }
