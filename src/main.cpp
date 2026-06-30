@@ -35,6 +35,8 @@ class App
     bool breakBlock{}, placeBlock{};
 
     bool attrForceResetDatabase_ = false;
+    bool wireframeBlocks_ = false;
+    bool wasPPressed_ = false;
 
     static void mouseButtonCallback(GLFWwindow *window, const int button, const int action, const int)
     {
@@ -193,6 +195,11 @@ public:
             }
         }
 
+        // Toggle block wireframe mode
+        const bool pPressed = Input::getKey(GLFW_KEY_P);
+        if (pPressed && !wasPPressed_) wireframeBlocks_ = !wireframeBlocks_;
+        wasPPressed_ = pPressed;
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         setupCamera(delta);
 
@@ -208,7 +215,9 @@ public:
         glDisable(GL_BLEND);
 
         // Draw all render layers
+        glPolygonMode(GL_FRONT_AND_BACK, wireframeBlocks_ ? GL_LINE : GL_FILL);
         levelRenderer->render(player->pos());
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 
         //Draw hit result

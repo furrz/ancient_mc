@@ -25,3 +25,4 @@ You may need vcpkg in manifest mode to build.
 - Toggle Flying: F
 - Move Down (while flying): Left Control
 - Toggle Noclip: N
+- Toggle Wireframe: P

@@ -58,7 +58,6 @@ void LevelRenderer::rebuildChunk(const glm::ivec3 pos) {
 
         glNewList(chunkDrawLists_ + index * NUM_CHUNK_PASSES + offset, GL_COMPILE);
         glEnable(GL_TEXTURE_2D);
-        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glBindTexture(GL_TEXTURE_2D, texture_);
         glBegin(GL_QUADS);
 
