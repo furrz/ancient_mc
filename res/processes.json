@@ -20,8 +20,16 @@
       "set_block": "dirt"
     },
     {
-      "name": "water_flow_down",
+      "name": "water_flow_down_detect",
       "types": ["ticked"],
+      "block": "air",
+      "above": "water",
+      "schedule": "water_flow_down",
+      "delay": 10
+    },
+    {
+      "name": "water_flow_down",
+      "types": ["scheduled"],
       "block": "air",
       "above": "water",
       "set_block": "water"

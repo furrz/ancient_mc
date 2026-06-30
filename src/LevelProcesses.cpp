@@ -17,9 +17,23 @@ LevelProcesses::LevelProcesses(ConVars *conVars, const BlockInfo *blockInfo) {
         return std::make_optional<uint8_t>(blockInfo->byID(key));
     };
 
+    struct ScheduledResolution
+    {
+        std::vector<Process>& processes;
+        const size_t index;
+        const std::string process_name;
+    };
+    std::vector<ScheduledResolution> toResolveScheduled;
+
     for (const auto &process: data["processes"]) {
         const auto types = process.value<nlohmann::json>("types",
             nlohmann::json::array({ "random" }));
+
+        const std::optional<uint8_t> replacement =
+            process.value<std::optional<std::string>>("set_block", std::nullopt)
+                .transform([&](const std::string& block_name) {
+                    return blockInfo->byID(block_name);
+                });
 
         const auto proc = Process{
             process.value<std::string>("name", "unnamed"),
@@ -29,8 +43,13 @@ LevelProcesses::LevelProcesses(ConVars *conVars, const BlockInfo *blockInfo) {
             process.value<std::optional<std::string> >("beside", std::nullopt).and_then(getOptional),
             process.value<int>("beside_min", 1),
             process.value<int>("beside_max", 5),
-            blockInfo->byID(process.value<std::string>("set_block", "air"))
+            replacement,
+            std::nullopt,
+            process.value<uint8_t>("delay", 0)
         };
+
+        const auto schedule_target =
+            process.value<std::optional<std::string>>("schedule", std::nullopt);
 
         for (const auto& type_name : types) {
             if (type_name == "random") {
@@ -40,14 +59,36 @@ LevelProcesses::LevelProcesses(ConVars *conVars, const BlockInfo *blockInfo) {
                     process.value<int>("repeat", 1)
                 );
                 randomProcesses_.emplace_back(proc);
+                if (schedule_target.has_value()) {
+                    toResolveScheduled.emplace_back(
+                        randomProcesses_,
+                        randomProcesses_.size() - 1,
+                        schedule_target.value());
+                }
             } else if (type_name == "ticked") {
                 tickedProcesses_.emplace_back(proc);
+                if (schedule_target.has_value()) {
+                    toResolveScheduled.emplace_back(
+                        tickedProcesses_,
+                        tickedProcesses_.size() - 1,
+                        schedule_target.value());
+                }
             } else if (type_name == "world_gen") {
                 worldGenProcesses_.emplace_back(proc);
+            } else if (type_name == "scheduled") {
+                scheduledProcesses_.emplace_back(proc);
             } else {
                 std::cerr << "Unrecognized process type: " << type_name << std::endl;
             }
         }
+    }
+
+    for (const auto& resolution : toResolveScheduled) {
+        const size_t index = std::ranges::find_if(scheduledProcesses_, [&](const Process& proc) {
+            return proc.name == resolution.process_name;
+        }) - scheduledProcesses_.begin();
+
+        resolution.processes[resolution.index].schedule_target = index;
     }
 }
 
@@ -94,6 +135,18 @@ void LevelProcesses::tick(Level *level, const Player *player) {
         }
     }
 
+    for (size_t i = 0; i < scheduledTicks_.size(); ++i) {
+        if (--scheduledTicks_[i].countdown) continue;
+        executeProcess(
+            scheduledProcesses_.at(scheduledTicks_[i].process),
+            scheduledTicks_[i].pos,
+            level
+        );
+        scheduledTicks_[i] = scheduledTicks_.back();
+        scheduledTicks_.pop_back();
+        i--;
+    }
+
     tickCounter_++;
 }
 
@@ -116,5 +169,14 @@ void LevelProcesses::executeProcess(const Process &process, glm::ivec3 pos, Leve
             return;
     }
 
-    level->setTile(pos, process.replacement_block);
+
+    if (process.replacement_block.has_value())
+        level->setTile(pos, process.replacement_block.value());
+
+    if (process.schedule_target.has_value())
+        scheduledTicks_.emplace_back(
+            process.schedule_delay,
+            pos,
+            process.schedule_target.value()
+        );
 }

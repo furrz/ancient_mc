@@ -22,13 +22,24 @@ class LevelProcesses {
         bool invert_above;
         std::optional<uint8_t> block_beside;
         int block_beside_min, block_beside_max;
-        uint8_t replacement_block;
+        std::optional<uint8_t> replacement_block;
+        std::optional<size_t> schedule_target;
+        uint8_t schedule_delay;
+    };
+
+    struct ScheduledTick
+    {
+        uint8_t countdown;
+        glm::ivec3 pos;
+        size_t process;
     };
 
     std::vector<RandomProcessTiming> randomProcessTiming_;
     std::vector<Process> randomProcesses_;
     std::vector<Process> tickedProcesses_;
     std::vector<Process> worldGenProcesses_;
+    std::vector<Process> scheduledProcesses_;
+    std::vector<ScheduledTick> scheduledTicks_;
     int tickCounter_{};
 
     void executeProcess(const Process& process, glm::ivec3 pos, Level *level);
