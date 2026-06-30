@@ -1,7 +1,0 @@
-glfw
-glm
-glad
-stb
-nlohmann_json
-libnoise
-leveldb
