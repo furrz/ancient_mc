@@ -24,3 +24,4 @@ You may need vcpkg in manifest mode to build.
 - Reset Position: R
 - Toggle Flying: F
 - Move Down (while flying): Left Control
+- Toggle Noclip: N
