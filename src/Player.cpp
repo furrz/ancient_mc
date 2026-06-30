@@ -60,6 +60,12 @@ void Player::resetPos()
     float x = RNG::randomFloat() * static_cast<float>(level_->size().x);
     float y = static_cast<float>(level_->size().y);
     float z = RNG::randomFloat() * static_cast<float>(level_->size().z);
+
+    // Roughly position the player on the ground.
+    while (level_->blockAttribs({ x, y - 2, z }) == 0 && y > 2) {
+        y--;
+    }
+
     setPos({ x, y, z });
 }
 
